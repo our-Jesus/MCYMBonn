@@ -1,35 +1,65 @@
 <!DOCTYPE html>
-<html lang="de"> <head>
+<html lang="de">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCYM Bonn/Köln Events Calendar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Apply Inter font to the body */
+        /* Ensure html and body take full height for background */
+        html, body {
+            height: 100%;
+            margin: 0; /* Basic reset */
+            padding: 0; /* Basic reset */
+        }
+
         body {
             font-family: 'Inter', sans-serif;
+            /* --- Background Image Setup --- */
+            /* Updated Image: Eucharistic Adoration by Jacob Bentzinger from Unsplash */
+            background-image: url('https://images.unsplash.com/photo-1600679405012-04506d8a15c1?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover; /* Cover the entire viewport */
+            background-position: center center; /* Center the image */
+            background-attachment: fixed; /* Creates a parallax-like effect when scrolling */
+            position: relative; /* Establishes a stacking context for the ::before pseudo-element */
         }
-        /* Custom styles for the iframe container to manage responsive height - FURTHER UPDATED HEIGHTS */
+
+        /* Semi-transparent overlay to improve readability of content over the background image */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.6); /* Light overlay */
+            /* This overlay will sit on top of the body's background image */
+        }
+
+        /* Ensure header, main, and footer are above the overlay */
+        header, main, footer {
+            position: relative; /* Allows z-index to apply */
+            z-index: 1; /* Ensures content is above the body's ::before pseudo-element (overlay) */
+        }
+
         .calendar-iframe-container iframe {
-            width: 100%; /* Make iframe take full width of its container */
-            min-height: 600px; /* Minimum height for very small screens - Increased */
+            width: 100%;
+            min-height: 600px;
         }
-        /* Medium screens and up */
         @media (min-width: 768px) {
             .calendar-iframe-container iframe {
-                min-height: 750px; /* Standard height for tablets and desktops - Increased */
+                min-height: 750px;
             }
         }
-        /* Large screens and up */
         @media (min-width: 1024px) {
             .calendar-iframe-container iframe {
-                min-height: 900px; /* Taller height for larger desktop screens - Increased */
+                min-height: 900px;
             }
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 antialiased">
+<body class="text-gray-800 antialiased">
 
     <header class="bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-lg">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 text-center">
@@ -47,12 +77,8 @@
     </header>
 
     <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+        <div class="shadow-xl rounded-lg overflow-hidden">
             <div class="calendar-iframe-container">
-                <!-- IMPORTANT:
-                    1. Ensure the Google Calendar linked by the 'src' attribute is public.
-                    2. Verify the 'ctz' (timezone) parameter is correct for Bonn/Köln (e.g., Europe/Berlin).
-                -->
                 <iframe
                     src="https://calendar.google.com/calendar/embed?src=ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05%40group.calendar.google.com&ctz=Europe%2FBerlin"
                     style="border: 0;"
@@ -63,14 +89,12 @@
                 </iframe>
             </div>
         </div>
+    </main>
 
-        </main>
-
-    <footer class="bg-gray-800 text-gray-400 py-8 mt-12">
+    <footer class="py-8 mt-12">
         <div class="container mx-auto px-6 text-center">
-            <p>MCYM Bonn/Köln</p>
-        </div>
+            <p class="text-gray-700">MCYM Bonn/Köln</p> </div>
     </footer>
 
-    </body>
+</body>
 </html>
