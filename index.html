@@ -6,36 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCYM Bonn/Köln Events Calendar</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
     <style>
         html,
         body {
             height: 100%;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
         }
 
-        /* Animated gradient background */
+        /* Static gradient background - no animation */
         body {
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-        }
-
-        @keyframes gradientShift {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
+            background: linear-gradient(-45deg, #667eea, #764ba2, #4ecdc4, #45b7d1);
+            background-attachment: fixed;
         }
 
         /* Floating particles animation */
@@ -68,13 +53,13 @@
             }
         }
 
-        /* Glass morphism effect */
+        /* Glass morphism effect with better text contrast */
         .glass {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             /* Safari support */
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         /* Enhanced card hover effects */
@@ -202,13 +187,13 @@
         }
 
         .event-title {
-            font-size: 1.2rem;
-            /* Slightly smaller for conciseness with more cards */
+            font-size: 1.3rem;
+            /* Slightly larger for better readability */
             font-weight: 700;
-            color: #2d3748;
-            /* Tailwind gray-800 */
+            color: #1a202c;
+            /* Darker for better contrast */
             margin-bottom: 12px;
-            line-height: 1.3;
+            line-height: 1.4;
         }
 
         .event-details {
@@ -219,10 +204,12 @@
             display: flex;
             align-items: center;
             margin-bottom: 8px;
-            font-size: 0.875rem;
-            /* 14px, slightly smaller */
-            color: #4a5568;
-            /* Tailwind gray-600 */
+            font-size: 0.95rem;
+            /* Slightly larger */
+            color: #2d3748;
+            /* Darker for better readability */
+            font-weight: 500;
+            /* Medium weight for better readability */
         }
 
         .event-detail-icon {
@@ -242,11 +229,12 @@
             padding: 12px 16px;
             margin: 16px 0;
             border-radius: 0 8px 8px 0;
-            font-size: 0.875rem;
-            /* 14px */
-            line-height: 1.5;
-            color: #2d3748;
-            /* Tailwind gray-800 */
+            font-size: 0.95rem;
+            /* Larger for better readability */
+            line-height: 1.6;
+            color: #1a202c;
+            /* Darker text for better contrast */
+            font-weight: 400;
             flex-grow: 1;
             /* Allow description to take available space if needed */
         }
@@ -271,10 +259,10 @@
         .event-action-btn {
             flex: 1;
             min-width: 120px;
-            padding: 10px 16px;
+            padding: 12px 18px;
             border-radius: 8px;
-            font-size: 0.85rem;
-            /* 13.6px */
+            font-size: 0.9rem;
+            /* Slightly larger */
             font-weight: 600;
             text-decoration: none;
             text-align: center;
@@ -580,43 +568,6 @@
             background: rgba(255, 255, 255, 0.5);
         }
 
-        /* Glowing border animation */
-        .glow-border {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .glow-border::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7, #fd79a8);
-            background-size: 200% 200%;
-            /* For smoother animation */
-            border-radius: inherit;
-            z-index: -1;
-            animation: borderGlow 4s linear infinite;
-            /* Slower glow */
-            opacity: 0.7;
-        }
-
-        @keyframes borderGlow {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
         /* Enhanced typography */
         .gradient-text {
             background: linear-gradient(135deg, #fde047, #facc15, #eab308);
@@ -660,17 +611,18 @@
                     MCYM <span class="header-gradient-text block sm:inline">Bonn/Köln</span>
                 </h1>
             </div>
-            <p class="text-lg sm:text-xl lg:text-2xl font-light text-white/90 mb-3 sm:mb-4">Events Calendar</p>
-            <p class="text-sm sm:text-base lg:text-lg text-white/80 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
+            <p class="text-lg sm:text-xl lg:text-2xl font-medium text-white mb-3 sm:mb-4">Events Calendar</p>
+            <p
+                class="text-base sm:text-lg lg:text-xl text-white/95 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0 font-medium">
                 Discover all our upcoming events and activities. Stay connected with the Malankara Catholic Youth
                 Movement community calendar.
             </p>
 
             <div class="flex justify-center items-center mt-6 sm:mt-8 space-x-4">
                 <span id="calendar-status" class="status-indicator status-live"></span>
-                <span class="text-white/80 text-sm" id="status-text">Loading calendar data...</span>
+                <span class="text-white text-sm font-medium" id="status-text">Loading calendar data...</span>
                 <button id="refresh-btn" onclick="refreshCalendar()"
-                    class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm text-white transition-colors flex items-center space-x-1.5 focus:outline-none focus:ring-2 focus:ring-white/50"
+                    class="px-4 py-2 bg-white/25 hover:bg-white/35 rounded-lg text-sm text-white transition-colors flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-white/50 font-medium"
                     title="Refresh calendar events"> <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -679,8 +631,8 @@
                     <span>Refresh</span>
                 </button>
             </div>
-            <div class="flex justify-center mt-1">
-                <span class="text-white/60 text-xs" id="last-updated"></span>
+            <div class="flex justify-center mt-2">
+                <span class="text-white/80 text-xs font-medium" id="last-updated"></span>
             </div>
 
             <div class="flex justify-center space-x-4 sm:space-x-8 mt-6 sm:mt-8">
@@ -705,12 +657,14 @@
         <div class="glass rounded-2xl overflow-hidden shadow-2xl mb-12 reveal">
             <div class="p-4 sm:p-6 bg-gradient-to-r from-indigo-500/20 to-purple-600/20">
                 <h2 class="text-xl sm:text-2xl font-bold text-white mb-2 text-center">🗓️ Upcoming Events</h2>
-                <p class="text-white/80 text-center text-sm sm:text-base" id="upcomingEventsTitle">Loading exciting
+                <p class="text-white text-center text-base sm:text-lg font-medium" id="upcomingEventsTitle">Loading
+                    exciting
                     events...</p>
-                <p class="text-white/70 text-center text-xs sm:text-sm mt-2">Click "Add to Calendar" to save the date!
+                <p class="text-white/90 text-center text-sm sm:text-base mt-2 font-medium">Click "Add to Calendar" to
+                    save the date!
                 </p>
             </div>
-            <div class="p-4 sm:p-6 bg-white/95 backdrop-blur-sm">
+            <div class="p-4 sm:p-6 bg-white/98 backdrop-blur-sm">
                 <div id="upcomingEvents" class="grid gap-6" style="display: none;">
                 </div>
                 <div id="loadingEvents" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -723,15 +677,17 @@
                 </div>
                 <div id="noEventsMessage" class="text-center py-8 sm:py-10" style="display: none;">
                     <div class="text-4xl sm:text-6xl mb-3 sm:mb-4">🕊️</div>
-                    <p class="text-gray-700 text-base sm:text-lg font-semibold">No upcoming events scheduled at the
+                    <p class="text-gray-800 text-lg sm:text-xl font-semibold">No upcoming events scheduled at the
                         moment.</p>
-                    <p class="text-sm sm:text-base text-gray-500 mt-2">Please check back soon for new activities and
+                    <p class="text-base sm:text-lg text-gray-600 mt-2 font-medium">Please check back soon for new
+                        activities and
                         gatherings!</p>
                 </div>
                 <div id="errorMessage" class="text-center py-8 sm:py-10" style="display: none;">
                     <div class="text-4xl sm:text-6xl mb-3 sm:mb-4">😥</div>
-                    <p class="text-red-600 text-base sm:text-lg font-semibold">Oops! We couldn't load the events.</p>
-                    <p class="text-sm sm:text-base text-gray-500 mt-2">Please try refreshing or check your internet
+                    <p class="text-red-700 text-lg sm:text-xl font-semibold">Oops! We couldn't load the events.</p>
+                    <p class="text-base sm:text-lg text-gray-600 mt-2 font-medium">Please try refreshing or check your
+                        internet
                         connection. If the issue persists, the events data might be updating.</p>
                     <button onclick="refreshCalendar()"
                         class="mt-6 px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium flex items-center justify-center mx-auto shadow-md hover:shadow-lg">
@@ -746,7 +702,7 @@
             </div>
         </div>
 
-        <div class="calendar-card glass rounded-2xl overflow-hidden shadow-2xl glow-border reveal">
+        <div class="calendar-card glass rounded-2xl overflow-hidden shadow-2xl reveal">
             <div class="p-6 bg-gradient-to-r from-indigo-500/20 to-purple-600/20">
                 <h2 class="text-2xl font-bold text-white mb-2 text-center">📅 Full Event Calendar</h2>
                 <p class="text-white/80 text-center">Explore all activities - click on any event for more details.</p>
@@ -781,7 +737,7 @@
                     </svg>
                     About MCYM
                 </h3>
-                <p class="text-white/80 leading-relaxed">
+                <p class="text-white text-base leading-relaxed font-medium">
                     The Malankara Catholic Youth Movement (MCYM) in Bonn and Cologne is a vibrant community connecting
                     young Catholics. We focus on spiritual growth, fellowship, and service through diverse faith-based
                     events, enriching retreats, and impactful community activities.
@@ -800,14 +756,14 @@
                     </svg>
                     Stay Connected
                 </h3>
-                <p class="text-white/80 leading-relaxed">
+                <p class="text-white text-base leading-relaxed font-medium">
                     Never miss an update! Subscribe to our Google Calendar or follow our community channels for the
                     latest announcements, event details, and fellowship opportunities.
                 </p>
                 <div class="mt-4">
                     <a href="https://calendar.google.com/calendar/embed?src=ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05%40group.calendar.google.com&ctz=Europe%2FBerlin"
                         target="_blank"
-                        class="inline-flex items-center px-4 py-2 bg-yellow-400/30 hover:bg-yellow-500/40 text-yellow-100 rounded-lg text-sm font-medium transition-colors">
+                        class="inline-flex items-center px-4 py-2 bg-yellow-400/30 hover:bg-yellow-500/40 text-yellow-100 rounded-lg text-sm font-semibold transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                             class="w-5 h-5 mr-2">
                             <path fill-rule="evenodd"
@@ -830,8 +786,7 @@
             </div>
             <p class="text-white font-medium">MCYM Bonn/Köln</p>
             <p class="text-white/60 text-sm mt-2">Building Faith • Inspiring Youth • Serving Community</p>
-            <p class="text-white/50 text-xs mt-4">&copy; <span id="currentYear"></span> MCYM Bonn/Köln. All rights
-                reserved.</p>
+
         </div>
     </footer>
 
@@ -959,7 +914,7 @@
             })).filter(event => event.start) : []; // Ensure events have a start time
 
             console.log(`🔴 Live API data loaded: ${events.length} events`);
-            updateStatus('live', `Live calendar loaded • ${events.length} events • Real-time data ⚡`);
+            updateStatus('live', `• ${events.length} events • `);
 
             calendarData = { // Store the fetched live data
                 lastUpdated: new Date().toISOString(),
