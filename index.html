@@ -1,6 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- 
+MCYM BONN/KÖLN EVENTS CALENDAR
+==============================
+
+BADGE CUSTOMIZATION GUIDE:
+--------------------------
+You can control event badges in three ways:
+
+1. AUTOMATIC: Based on keywords in event title/description
+   - "Holy Qurbana" → Mass badge  
+   - "Youth Fellowship" → Youth badge
+   - "Food Drive" → Service badge
+   - "Prayer Vigil" → Prayer badge
+   - "Retreat" → Retreat badge
+   - "Bible Study" → Meeting badge
+
+2. MANUAL OVERRIDE: Add "badge" property to your event data
+   Example: { title: "Special Event", badge: "special", ... }
+
+3. AVAILABLE BADGE TYPES:
+   - mass (purple) - for liturgy/qurbana
+   - youth (pink) - for fellowship/youth events  
+   - service (yellow) - for charity/volunteer
+   - prayer (blue) - for prayer/vigil events
+   - retreat (green) - for retreats/formation
+   - meeting (orange) - for study/meetings
+   - social (purple) - for social events
+   - special (light green) - for special occasions
+
+SETUP FOR REAL DATA:
+-------------------
+1. Add your Google API key to CONFIG.GOOGLE_API_KEY (optional for live fallback)
+2. Create data/events.json with your calendar events, OR
+3. Use the Google Calendar API integration
+
+The system will try to load from data/events.json first, then fallback to 
+Google Calendar API if configured.
+-->
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -308,44 +347,47 @@
 
         .badge-mass {
             background: linear-gradient(135deg, #ddd6fe, #c7d2fe);
-            /* Tailwind violet-200 to indigo-200 */
             color: #5b21b6;
-            /* Tailwind violet-700 */
         }
 
         .badge-retreat {
             background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-            /* Tailwind green-100 to green-200 */
             color: #166534;
-            /* Tailwind green-800 */
         }
 
         .badge-service {
             background: linear-gradient(135deg, #fef3c7, #fed7aa);
-            /* Tailwind amber-100 to amber-300 */
             color: #92400e;
-            /* Tailwind amber-800 */
         }
 
         .badge-prayer {
             background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-            /* Tailwind blue-100 to blue-200 */
             color: #1e40af;
-            /* Tailwind blue-800 */
         }
 
         .badge-youth {
             background: linear-gradient(135deg, #fed7e2, #fbb6ce);
-            /* Tailwind pink-100 to pink-300 */
             color: #be185d;
-            /* Tailwind pink-700 */
+        }
+
+        .badge-meeting {
+            background: linear-gradient(135deg, #fef0e5, #fed7b2);
+            color: #d97706;
+        }
+
+        .badge-social {
+            background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+            color: #7c3aed;
+        }
+
+        .badge-special {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            color: #166534;
         }
 
         .badge-default {
             background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-            /* Tailwind gray-100 to gray-200 */
             color: #374151;
-            /* Tailwind gray-700 */
         }
 
         /* Mobile responsiveness for enhanced cards */
@@ -796,11 +838,11 @@
         // ====================================
         const CONFIG = {
             // HYBRID MODE: Add your API credentials to enable live fallback
-            GOOGLE_API_KEY: 'AIzaSyCKG5EWSl4hrKPrZ-LaB3G5BHIITA29oA8', // Add your RESTRICTED browser API key here
-            CALENDAR_ID: 'ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05@group.calendar.google.com', // Add your calendar ID here
+            GOOGLE_API_KEY: '', // Add your RESTRICTED browser API key here
+            CALENDAR_ID: 'ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05@group.calendar.google.com',
 
             // Hybrid behavior settings
-            ENABLE_LIVE_FALLBACK: true, // Set to true after adding API credentials
+            ENABLE_LIVE_FALLBACK: false, // Set to true after adding API credentials
             MAX_CACHE_AGE_HOURS: 2, // Use live API if static data is older than this
 
             // Performance settings
@@ -1148,18 +1190,49 @@
             return `https://calendar.google.com/calendar/render?${params.toString()}`;
         }
 
-        function getEventBadge(title, description = '') {
-            const text = (String(title) + ' ' + String(description)).toLowerCase(); // Ensure inputs are strings
-            if (text.includes('mass') || text.includes('holy qurbana') || text.includes('liturgy')) return 'mass';
-            if (text.includes('retreat') || text.includes('formation') || text.includes('workshop')) return 'retreat';
-            if (text.includes('service') || text.includes('volunteer') || text.includes('charity') || text.includes('outreach')) return 'service';
-            if (text.includes('prayer') || text.includes('adoration') || text.includes('rosary') || text.includes('vigil')) return 'prayer';
-            if (text.includes('youth') || text.includes('fellowship') || text.includes('social') || text.includes('gathering')) return 'youth';
-            return 'default';
+        function getEventBadge(title, description = '', manualBadge = null) {
+            // If a manual badge is specified, use it
+            if (manualBadge && ['mass', 'retreat', 'service', 'prayer', 'youth', 'social', 'meeting', 'special'].includes(manualBadge.toLowerCase())) {
+                return manualBadge.toLowerCase();
+            }
+
+            const text = (String(title) + ' ' + String(description)).toLowerCase();
+
+            // Mass/Liturgy events
+            if (text.includes('mass') || text.includes('holy qurbana') || text.includes('qurbana') || text.includes('liturgy') || text.includes('eucharist')) {
+                return 'mass';
+            }
+
+            // Retreat/Formation events  
+            if (text.includes('retreat') || text.includes('formation') || text.includes('workshop') || text.includes('seminar')) {
+                return 'retreat';
+            }
+
+            // Service/Charity events
+            if (text.includes('service') || text.includes('volunteer') || text.includes('charity') || text.includes('outreach') || text.includes('food drive') || text.includes('donation')) {
+                return 'service';
+            }
+
+            // Prayer events
+            if (text.includes('prayer') || text.includes('adoration') || text.includes('rosary') || text.includes('vigil') || text.includes('novena')) {
+                return 'prayer';
+            }
+
+            // Youth/Fellowship events
+            if (text.includes('youth') || text.includes('fellowship') || text.includes('social') || text.includes('gathering') || text.includes('meeting')) {
+                return 'youth';
+            }
+
+            // Bible study gets its own category
+            if (text.includes('bible') || text.includes('scripture') || text.includes('study')) {
+                return 'meeting';
+            }
+
+            return 'special'; // Changed from 'default' to 'special'
         }
 
         function createEventCard(event) {
-            const badgeType = getEventBadge(event.title, event.description);
+            const badgeType = getEventBadge(event.title, event.description, event.badge);
             const eventTime = formatEventTime(event.start);
             const eventDate = formatEventDate(event.start);
             const dateDay = getDateDay(event.start);
