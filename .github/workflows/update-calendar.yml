@@ -1,15 +1,17 @@
+# .github/workflows/update-calendar.yml
+# This runs automatically every 2 hours
+
 name: Update Calendar Events
 
 on:
   schedule:
-    # Run every 6 hours
-    - cron: '0 */6 * * *'
-  workflow_dispatch: # Allow manual trigger
+    - cron: '0 */2 * * *'  # Every 2 hours: 00:00, 02:00, 04:00, etc.
+  workflow_dispatch:       # Manual trigger button
   push:
-    branches: [ main ]
+    branches: [ main ]      # Updates when you push code changes
 
 permissions:
-  contents: write
+  contents: write          # Allows writing to repository
 
 jobs:
   update-events:
@@ -18,6 +20,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -29,53 +33,77 @@ jobs:
         GOOGLE_CALENDAR_API_KEY: ${{ secrets.GOOGLE_CALENDAR_API_KEY }}
         CALENDAR_ID: ${{ secrets.CALENDAR_ID }}
       run: |
-        # Create data directory
+        # Create data directory if it doesn't exist
         mkdir -p data
         
-        # Get current date and 3 months from now
+        # Calculate date range (now + 3 months)
         START_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
         END_DATE=$(date -u -d "+3 months" +"%Y-%m-%dT%H:%M:%SZ")
         
-        # Fetch events from Google Calendar API
-        curl -s "https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${GOOGLE_CALENDAR_API_KEY}&timeMin=${START_DATE}&timeMax=${END_DATE}&singleEvents=true&orderBy=startTime&maxResults=50" \
-          > data/calendar-events.json
+        echo "📅 Fetching events from $START_DATE to $END_DATE"
         
-        # Create a simple events.json with processed data
-        node -e "
-        const fs = require('fs');
-        const data = JSON.parse(fs.readFileSync('data/calendar-events.json', 'utf8'));
+        # Fetch from Google Calendar API
+        API_URL="https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events"
+        PARAMS="key=${GOOGLE_CALENDAR_API_KEY}&timeMin=${START_DATE}&timeMax=${END_DATE}&singleEvents=true&orderBy=startTime&maxResults=50"
         
-        const processedEvents = data.items ? data.items.map(event => ({
-          id: event.id,
-          title: event.summary || 'Untitled Event',
-          description: event.description || '',
-          start: event.start.dateTime || event.start.date,
-          end: event.end.dateTime || event.end.date,
-          location: event.location || '',
-          htmlLink: event.htmlLink || '',
-          created: event.created,
-          updated: event.updated
-        })) : [];
+        # Make API request with error handling
+        HTTP_STATUS=$(curl -s -w "%{http_code}" -o data/calendar-events.json "${API_URL}?${PARAMS}")
         
-        const output = {
-          lastUpdated: new Date().toISOString(),
-          events: processedEvents
-        };
-        
-        fs.writeFileSync('data/events.json', JSON.stringify(output, null, 2));
-        console.log('Processed', processedEvents.length, 'events');
-        "
-        
-        # Check if we have events
-        if [ ! -f "data/events.json" ]; then
-          echo "Failed to create events.json"
+        if [ "$HTTP_STATUS" -ne 200 ]; then
+          echo "❌ API request failed with status $HTTP_STATUS"
           exit 1
         fi
+        
+        echo "✅ Successfully fetched calendar data"
+        
+        # Process the raw API response into clean format
+        node -e "
+        const fs = require('fs');
+        
+        try {
+          const data = JSON.parse(fs.readFileSync('data/calendar-events.json', 'utf8'));
+          
+          // Process events into clean format
+          const processedEvents = data.items ? data.items.map(event => ({
+            id: event.id,
+            title: event.summary || 'Untitled Event',
+            description: (event.description || '').replace(/<[^>]*>/g, '').substring(0, 300),
+            start: event.start ? (event.start.dateTime || event.start.date) : null,
+            end: event.end ? (event.end.dateTime || event.end.date) : null,
+            location: event.location || '',
+            htmlLink: event.htmlLink || '',
+            created: event.created,
+            updated: event.updated
+          })).filter(event => event.start) : [];
+          
+          // Create final output file
+          const output = {
+            lastUpdated: new Date().toISOString(),
+            totalEvents: processedEvents.length,
+            source: 'github-actions',
+            nextUpdate: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // +2 hours
+            events: processedEvents
+          };
+          
+          fs.writeFileSync('data/events.json', JSON.stringify(output, null, 2));
+          console.log('✅ Processed', processedEvents.length, 'events');
+          
+        } catch (error) {
+          console.error('❌ Error processing calendar data:', error.message);
+          process.exit(1);
+        }
+        "
     
-    - name: Commit and push if changed
+    - name: Commit and push changes
       run: |
         git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        git config --local user.name "GitHub Action Bot"
         git add data/
-        git diff --staged --quiet || git commit -m "Update calendar events - $(date)"
-        git push
+        
+        if git diff --staged --quiet; then
+          echo "📝 No changes to commit"
+        else
+          git commit -m "🔄 Update calendar events - $(date '+%Y-%m-%d %H:%M:%S UTC')"
+          git push
+          echo "🚀 Changes committed and pushed"
+        fi

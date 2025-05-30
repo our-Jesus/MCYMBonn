@@ -245,6 +245,10 @@
             background-color: #ef4444;
         }
 
+        .status-warning {
+            background-color: #f59e0b;
+        }
+
         /* Event type badges */
         .event-badge {
             font-size: 0.75rem;
@@ -313,11 +317,19 @@
                 Movement community calendar.
             </p>
 
-            <!-- Status indicator -->
-            <div class="flex justify-center items-center mt-6 sm:mt-8">
+            <!-- Status indicator with refresh button -->
+            <div class="flex justify-center items-center mt-6 sm:mt-8 space-x-4">
                 <span id="calendar-status" class="status-indicator status-live"></span>
                 <span class="text-white/80 text-sm" id="status-text">Loading calendar data...</span>
-                <span class="text-white/60 text-xs ml-4" id="last-updated"></span>
+                <button id="refresh-btn" onclick="refreshCalendar()"
+                    class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-sm text-white transition-colors flex items-center space-x-1"
+                    title="Refresh calendar events">
+                    <span>🔄</span>
+                    <span>Refresh</span>
+                </button>
+            </div>
+            <div class="flex justify-center">
+                <span class="text-white/60 text-xs" id="last-updated"></span>
             </div>
 
             <!-- Quick stats -->
@@ -364,7 +376,8 @@
                 <div id="errorMessage" class="text-center py-6 sm:py-8" style="display: none;">
                     <div class="text-4xl sm:text-6xl mb-3 sm:mb-4">⚠️</div>
                     <p class="text-red-600 text-sm sm:text-base">Unable to load calendar events.</p>
-                    <p class="text-xs sm:text-sm text-gray-500 mt-2">Please try refreshing the page.</p>
+                    <p class="text-xs sm:text-sm text-gray-500 mt-2">Please try refreshing the page or run the GitHub
+                        Action to generate events data.</p>
                 </div>
             </div>
         </div>
@@ -428,28 +441,86 @@
     </footer>
 
     <script>
+        // ====================================
+        // HYBRID SYSTEM CONFIGURATION
+        // ====================================
+        const CONFIG = {
+            // Static-only mode (perfect for GitHub Actions setup)
+            GOOGLE_API_KEY: 'AIzaSyCKG5EWSl4hrKPrZ-LaB3G5BHIITA29oA8', // Empty = uses only static data from GitHub Actions
+            CALENDAR_ID: 'ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05@group.calendar.google.com', // Empty = static-only mode
+
+            // ENABLE HYBRID MODE
+            ENABLE_LIVE_FALLBACK: true, // Change this to true!
+            MAX_CACHE_AGE_HOURS: 1, // Use live API if static data > 4 hours old
+            AUTO_REFRESH_MINUTES: 20,
+            RETRY_ATTEMPTS: 3
+        };
+
         // Global variables
         let calendarData = null;
         let isLoading = true;
 
-        // Fetch real calendar events from GitHub Actions generated data
+        // ====================================
+        // MAIN DATA FETCHING LOGIC
+        // ====================================
         async function fetchCalendarEvents() {
-            try {
-                const response = await fetch('./data/events.json');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+            console.log('🔍 Starting calendar data fetch...');
 
-                const data = await response.json();
-                calendarData = data;
-                updateStatus('live', `Calendar loaded successfully • ${data.events.length} events found`);
-                updateLastUpdated(data.lastUpdated);
-                return data.events;
+            try {
+                // Get static data from GitHub Actions
+                console.log('📁 Fetching static data from GitHub Actions...');
+                const staticData = await fetchStaticCalendarData();
+
+                console.log('✅ Using static data from GitHub Actions');
+                updateStatus('live', `Calendar loaded • ${staticData.totalEvents || staticData.events.length} events • Auto-updates every 2h`);
+                updateLastUpdated(staticData.lastUpdated);
+                return staticData.events;
+
             } catch (error) {
-                console.error('Error fetching calendar events:', error);
+                console.error('❌ Failed to load calendar data:', error);
                 updateStatus('error', 'Failed to load calendar data');
                 throw error;
             }
+        }
+
+        // ====================================
+        // STATIC DATA SOURCE (PRIMARY)
+        // ====================================
+        async function fetchStaticCalendarData() {
+            const response = await fetch('./data/events.json', {
+                cache: 'no-cache', // Always check for updates
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('Events file not found. Please run the GitHub Action to generate calendar data.');
+                }
+                throw new Error(`Failed to load calendar data: HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log(`📊 Static data loaded: ${data.events.length} events from ${data.source || 'GitHub Actions'}`);
+
+            return data;
+        }
+
+        // ====================================
+        // UTILITY FUNCTIONS
+        // ====================================
+        function calculateDataAge(lastUpdated) {
+            const now = new Date();
+            const updated = new Date(lastUpdated);
+            const diffMs = now - updated;
+
+            return {
+                hours: Math.floor(diffMs / (1000 * 60 * 60)),
+                minutes: Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60)),
+                totalMs: diffMs
+            };
         }
 
         // Update status indicator
@@ -457,14 +528,14 @@
             const statusIndicator = document.getElementById('calendar-status');
             const statusText = document.getElementById('status-text');
 
-            statusIndicator.className = `status-indicator status-${status}`;
-            statusText.textContent = message;
+            if (statusIndicator) statusIndicator.className = `status-indicator status-${status}`;
+            if (statusText) statusText.textContent = message;
         }
 
         // Update last updated time
         function updateLastUpdated(timestamp) {
             const lastUpdatedEl = document.getElementById('last-updated');
-            if (timestamp) {
+            if (timestamp && lastUpdatedEl) {
                 const date = new Date(timestamp);
                 const timeAgo = getTimeAgo(date);
                 lastUpdatedEl.textContent = `Updated ${timeAgo}`;
@@ -483,6 +554,10 @@
             if (diffDays < 7) return `${diffDays}d ago`;
             return date.toLocaleDateString();
         }
+
+        // ====================================
+        // EVENT PROCESSING FUNCTIONS
+        // ====================================
 
         // Get upcoming events from fetched data
         function getUpcomingEvents(events) {
@@ -586,49 +661,107 @@
             `;
         }
 
-        // Display upcoming events
-        async function displayUpcomingEvents() {
+        // ====================================
+        // MANUAL REFRESH FUNCTIONALITY
+        // ====================================
+        async function refreshCalendar() {
+            const refreshBtn = document.getElementById('refresh-btn');
+            const originalContent = refreshBtn?.innerHTML;
+
+            try {
+                if (refreshBtn) {
+                    refreshBtn.innerHTML = '<span>⏳</span><span>Refreshing...</span>';
+                    refreshBtn.disabled = true;
+                }
+
+                console.log('🔄 Manual refresh triggered - reloading static data');
+
+                // Force refresh of static data
+                const events = await fetchCalendarEvents();
+                const upcomingEvents = getUpcomingEvents(events);
+                displayEvents(upcomingEvents);
+
+                // Success feedback
+                if (refreshBtn) {
+                    refreshBtn.innerHTML = '<span>✅</span><span>Updated!</span>';
+                    setTimeout(() => {
+                        refreshBtn.innerHTML = originalContent;
+                        refreshBtn.disabled = false;
+                    }, 2000);
+                }
+
+            } catch (error) {
+                console.error('❌ Refresh failed:', error);
+                if (refreshBtn) {
+                    refreshBtn.innerHTML = '<span>❌</span><span>Failed</span>';
+                    setTimeout(() => {
+                        refreshBtn.innerHTML = originalContent;
+                        refreshBtn.disabled = false;
+                    }, 2000);
+                }
+            }
+        }
+
+        // ====================================
+        // DISPLAY FUNCTIONS
+        // ====================================
+
+        // Helper function to display events
+        function displayEvents(upcomingEvents) {
             const upcomingEventsContainer = document.getElementById('upcomingEvents');
             const loadingContainer = document.getElementById('loadingEvents');
             const noEventsMessage = document.getElementById('noEventsMessage');
             const errorMessage = document.getElementById('errorMessage');
             const upcomingTitle = document.getElementById('upcomingEventsTitle');
 
+            if (upcomingTitle) upcomingTitle.textContent = `Next ${upcomingEvents.length} upcoming events`;
+
+            if (loadingContainer) loadingContainer.style.display = 'none';
+
+            if (upcomingEvents.length === 0) {
+                if (noEventsMessage) noEventsMessage.style.display = 'block';
+                if (upcomingEventsContainer) upcomingEventsContainer.style.display = 'none';
+                if (errorMessage) errorMessage.style.display = 'none';
+            } else {
+                if (upcomingEventsContainer) {
+                    upcomingEventsContainer.innerHTML = upcomingEvents
+                        .map(event => createEventCard(event))
+                        .join('');
+                    upcomingEventsContainer.style.display = 'block';
+                }
+                if (noEventsMessage) noEventsMessage.style.display = 'none';
+                if (errorMessage) errorMessage.style.display = 'none';
+            }
+        }
+
+        // Display upcoming events
+        async function displayUpcomingEvents() {
             try {
                 updateStatus('upcoming', 'Loading calendar events...');
                 const events = await fetchCalendarEvents();
                 const upcomingEvents = getUpcomingEvents(events);
 
-                // Update title
-                upcomingTitle.textContent = `Next ${upcomingEvents.length} upcoming events`;
-
-                // Hide loading
-                loadingContainer.style.display = 'none';
-
-                if (upcomingEvents.length === 0) {
-                    noEventsMessage.style.display = 'block';
-                    upcomingEventsContainer.style.display = 'none';
-                    errorMessage.style.display = 'none';
-                } else {
-                    upcomingEventsContainer.innerHTML = upcomingEvents
-                        .map(event => createEventCard(event))
-                        .join('');
-                    upcomingEventsContainer.style.display = 'block';
-                    noEventsMessage.style.display = 'none';
-                    errorMessage.style.display = 'none';
-                }
-
+                displayEvents(upcomingEvents);
                 isLoading = false;
 
             } catch (error) {
                 console.error('Error displaying events:', error);
-                loadingContainer.style.display = 'none';
-                errorMessage.style.display = 'block';
-                upcomingEventsContainer.style.display = 'none';
-                noEventsMessage.style.display = 'none';
+                const loadingContainer = document.getElementById('loadingEvents');
+                const errorMessage = document.getElementById('errorMessage');
+                const upcomingEventsContainer = document.getElementById('upcomingEvents');
+                const noEventsMessage = document.getElementById('noEventsMessage');
+
+                if (loadingContainer) loadingContainer.style.display = 'none';
+                if (errorMessage) errorMessage.style.display = 'block';
+                if (upcomingEventsContainer) upcomingEventsContainer.style.display = 'none';
+                if (noEventsMessage) noEventsMessage.style.display = 'none';
                 isLoading = false;
             }
         }
+
+        // ====================================
+        // VISUAL EFFECTS & ANIMATIONS
+        // ====================================
 
         // Create floating particles
         function createParticle() {
@@ -642,45 +775,70 @@
             particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
             particle.style.animationDelay = Math.random() * 5 + 's';
 
-            document.getElementById('particles-container').appendChild(particle);
+            const container = document.getElementById('particles-container');
+            if (container) {
+                container.appendChild(particle);
 
-            setTimeout(() => {
-                if (particle.parentNode) {
-                    particle.parentNode.removeChild(particle);
-                }
-            }, 25000);
-        }
-
-        // Create particles periodically
-        setInterval(createParticle, 3000);
-
-        // Create initial particles
-        for (let i = 0; i < 5; i++) {
-            setTimeout(createParticle, i * 1000);
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 25000);
+            }
         }
 
         // Scroll reveal animation
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
+        function initScrollReveal() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                }
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.reveal').forEach(el => {
+                observer.observe(el);
             });
-        }, observerOptions);
+        }
 
-        document.querySelectorAll('.reveal').forEach(el => {
-            observer.observe(el);
-        });
+        // ====================================
+        // INITIALIZATION
+        // ====================================
 
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', function () {
+            console.log('🚀 Initializing MCYM calendar system...');
+            console.log('⚙️ Configuration: Static-only mode with GitHub Actions');
+            console.log('📋 Data source: GitHub Actions every 2 hours');
+            console.log('🔄 Auto-refresh: Every 20 minutes');
+
             // Display upcoming events
             displayUpcomingEvents();
+
+            // Setup auto-refresh
+            setInterval(() => {
+                if (!isLoading) {
+                    console.log('🔄 Auto-refresh triggered');
+                    displayUpcomingEvents();
+                }
+            }, CONFIG.AUTO_REFRESH_MINUTES * 60 * 1000);
+
+            // Initialize visual effects
+            initScrollReveal();
+
+            // Create initial particles
+            for (let i = 0; i < 5; i++) {
+                setTimeout(createParticle, i * 1000);
+            }
+
+            // Create particles periodically
+            setInterval(createParticle, 3000);
 
             // Calendar iframe interaction
             const calendarContainer = document.querySelector('.calendar-iframe-container');
@@ -707,13 +865,6 @@
                 }
             });
         });
-
-        // Auto-refresh events every 30 minutes
-        setInterval(() => {
-            if (!isLoading) {
-                displayUpcomingEvents();
-            }
-        }, 30 * 60 * 1000);
     </script>
 
 </body>
