@@ -12,36 +12,47 @@
             height: 100%;
             margin: 0; /* Basic reset */
             padding: 0; /* Basic reset */
+            font-family: 'Inter', sans-serif; /* Apply font to body */
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            /* --- Background Image Setup --- */
-            /* Updated Image: Eucharistic Adoration by Jacob Bentzinger from Unsplash */
-            background-image: url('https://images.unsplash.com/photo-1600679405012-04506d8a15c1?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
-            background-size: cover; /* Cover the entire viewport */
-            background-position: center center; /* Center the image */
-            background-attachment: fixed; /* Creates a parallax-like effect when scrolling */
-            position: relative; /* Establishes a stacking context for the ::before pseudo-element */
+             /* No background image here anymore */
+            position: relative; /* Still good for overall page structure if needed */
         }
 
-        /* Semi-transparent overlay to improve readability of content over the background image */
-        body::before {
+        /* Dedicated fixed background div */
+        #page-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1600679405012-04506d8a15c1?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
+            z-index: -1; /* Place it behind all other content */
+        }
+
+        /* Overlay for the dedicated background div */
+        #page-background::before {
             content: "";
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(255, 255, 255, 0.6); /* Light overlay */
-            /* This overlay will sit on top of the body's background image */
+            /* Increased opacity for the page background overlay */
+            background-color: rgba(255, 255, 255, 0.7);
         }
 
-        /* Ensure header, main, and footer are above the overlay */
+
+        /* Content sections do not need explicit z-index now,
+           as the #page-background is definitively behind them. */
         header, main, footer {
-            position: relative; /* Allows z-index to apply */
-            z-index: 1; /* Ensures content is above the body's ::before pseudo-element (overlay) */
+            position: relative;
         }
+
 
         .calendar-iframe-container iframe {
             width: 100%;
@@ -61,6 +72,8 @@
 </head>
 <body class="text-gray-800 antialiased">
 
+    <div id="page-background"></div>
+
     <header class="bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-lg">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 text-center">
             <div class="flex justify-center items-center mb-3 sm:mb-4">
@@ -77,7 +90,7 @@
     </header>
 
     <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div class="shadow-xl rounded-lg overflow-hidden">
+        <div class="bg-white shadow-xl rounded-lg overflow-hidden">
             <div class="calendar-iframe-container">
                 <iframe
                     src="https://calendar.google.com/calendar/embed?src=ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05%40group.calendar.google.com&ctz=Europe%2FBerlin"
@@ -93,7 +106,8 @@
 
     <footer class="py-8 mt-12">
         <div class="container mx-auto px-6 text-center">
-            <p class="text-gray-700">MCYM Bonn/Köln</p> </div>
+            <p class="text-gray-700">MCYM Bonn/Köln</p>
+        </div>
     </footer>
 
 </body>
