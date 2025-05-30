@@ -83,15 +83,309 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
 
-        /* Event card animations */
+        /* Enhanced event cards */
         .event-card {
             transition: all 0.3s ease;
             transform: translateY(0);
+            border-radius: 16px;
+            overflow: hidden;
         }
 
         .event-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .event-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(45deg);
+            transition: transform 0.3s ease;
+        }
+
+        .event-card:hover .event-header::before {
+            transform: rotate(45deg) translate(50px, 50px);
+        }
+
+        .event-date-block {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .event-day {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+
+        .event-month-year {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .countdown-badge {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 8px;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        .countdown-today {
+            background: linear-gradient(135deg, #00b894, #00a085);
+        }
+
+        .countdown-tomorrow {
+            background: linear-gradient(135deg, #fdcb6e, #f39c12);
+        }
+
+        .countdown-soon {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+        }
+
+        .countdown-later {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+        }
+
+        .event-content {
+            padding: 20px;
+        }
+
+        .event-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .event-details {
+            margin-bottom: 16px;
+        }
+
+        .event-detail-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+
+        .event-detail-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            color: #667eea;
+            flex-shrink: 0;
+        }
+
+        .event-description {
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+            padding: 12px 16px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #2d3748;
+        }
+
+        .event-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .event-action-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(102, 126, 234, 0.15);
+            transform: translateY(-1px);
+        }
+
+        /* Enhanced event type badges */
+        .event-badge {
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        .badge-mass {
+            background: linear-gradient(135deg, #ddd6fe, #c7d2fe);
+            color: #5b21b6;
+        }
+
+        .badge-retreat {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            color: #166534;
+        }
+
+        .badge-service {
+            background: linear-gradient(135deg, #fef3c7, #fed7aa);
+            color: #92400e;
+        }
+
+        .badge-prayer {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color: #1e40af;
+        }
+
+        .badge-youth {
+            background: linear-gradient(135deg, #fed7e2, #fbb6ce);
+            color: #be185d;
+        }
+
+        .badge-default {
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            color: #374151;
+        }
+
+        /* Mobile responsiveness for enhanced cards */
+        @media (max-width: 640px) {
+            .event-header {
+                padding: 12px;
+            }
+
+            .event-content {
+                padding: 16px;
+            }
+
+            .event-title {
+                font-size: 1.1rem;
+            }
+
+            .event-actions {
+                flex-direction: column;
+            }
+
+            .event-action-btn {
+                min-width: unset;
+            }
+
+            .event-date-block {
+                padding: 8px;
+                margin-bottom: 8px;
+            }
+
+            .event-day {
+                font-size: 1.25rem;
+            }
+
+            .countdown-badge {
+                padding: 4px 8px;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Enhanced loading states */
+        .loading-skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-skeleton::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(0, 0, 0, 0.1);
+            font-size: 2rem;
+        }
+
+        /* Status indicators with enhanced visibility */
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+        }
+
+        .status-live {
+            background-color: #10b981;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2), 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .status-upcoming {
+            background-color: #f59e0b;
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2), 0 0 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .status-error {
+            background-color: #ef4444;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2), 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .status-warning {
+            background-color: #f59e0b;
+            animation: pulse 3s infinite;
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2), 0 0 20px rgba(245, 158, 11, 0.3);
         }
 
         /* Pulsing elements */
@@ -357,27 +651,35 @@
             <div class="p-4 sm:p-6 bg-gradient-to-r from-indigo-500/20 to-purple-600/20">
                 <h2 class="text-xl sm:text-2xl font-bold text-white mb-2 text-center">🗓️ Upcoming Events</h2>
                 <p class="text-white/80 text-center text-sm sm:text-base" id="upcomingEventsTitle">Loading events...</p>
+                <p class="text-white/70 text-center text-xs sm:text-sm mt-2">Click "Add to Calendar" to never miss an
+                    event!</p>
             </div>
             <div class="p-4 sm:p-6 bg-white/95 backdrop-blur-sm">
-                <div id="upcomingEvents" class="space-y-3 sm:space-y-4" style="display: none;">
-                    <!-- Events will be populated here -->
+                <div id="upcomingEvents" class="grid gap-6 lg:grid-cols-2 xl:grid-cols-2" style="display: none;">
+                    <!-- Enhanced events will be populated here -->
                 </div>
-                <div id="loadingEvents" class="space-y-3 sm:space-y-4">
+                <div id="loadingEvents" class="grid gap-6 lg:grid-cols-2 xl:grid-cols-2">
                     <!-- Loading skeletons -->
-                    <div class="loading-skeleton h-16 sm:h-20 rounded-lg"></div>
-                    <div class="loading-skeleton h-16 sm:h-20 rounded-lg"></div>
-                    <div class="loading-skeleton h-16 sm:h-20 rounded-lg"></div>
+                    <div class="loading-skeleton h-64 rounded-lg"></div>
+                    <div class="loading-skeleton h-64 rounded-lg"></div>
+                    <div class="loading-skeleton h-64 rounded-lg"></div>
+                    <div class="loading-skeleton h-64 rounded-lg"></div>
                 </div>
                 <div id="noEventsMessage" class="text-center py-6 sm:py-8" style="display: none;">
                     <div class="text-4xl sm:text-6xl mb-3 sm:mb-4">📅</div>
-                    <p class="text-gray-600 text-sm sm:text-base">No upcoming events scheduled.</p>
-                    <p class="text-xs sm:text-sm text-gray-500 mt-2">Check back soon for updates!</p>
+                    <p class="text-gray-600 text-sm sm:text-base font-semibold">No upcoming events scheduled.</p>
+                    <p class="text-xs sm:text-sm text-gray-500 mt-2">Check back soon for updates, or contact the
+                        organizers!</p>
                 </div>
                 <div id="errorMessage" class="text-center py-6 sm:py-8" style="display: none;">
                     <div class="text-4xl sm:text-6xl mb-3 sm:mb-4">⚠️</div>
-                    <p class="text-red-600 text-sm sm:text-base">Unable to load calendar events.</p>
+                    <p class="text-red-600 text-sm sm:text-base font-semibold">Unable to load calendar events.</p>
                     <p class="text-xs sm:text-sm text-gray-500 mt-2">Please try refreshing the page or run the GitHub
                         Action to generate events data.</p>
+                    <button onclick="refreshCalendar()"
+                        class="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors">
+                        🔄 Try Again
+                    </button>
                 </div>
             </div>
         </div>
@@ -445,15 +747,17 @@
         // HYBRID SYSTEM CONFIGURATION
         // ====================================
         const CONFIG = {
-            // Static-only mode (perfect for GitHub Actions setup)
-            GOOGLE_API_KEY: 'AIzaSyCKG5EWSl4hrKPrZ-LaB3G5BHIITA29oA8', // Empty = uses only static data from GitHub Actions
-            CALENDAR_ID: 'ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05@group.calendar.google.com', // Empty = static-only mode
+            // HYBRID MODE: Add your API credentials to enable live fallback
+            GOOGLE_API_KEY: '', // Add your RESTRICTED browser API key here
+            CALENDAR_ID: '', // Add your calendar ID here
 
-            // ENABLE HYBRID MODE
-            ENABLE_LIVE_FALLBACK: true, // Change this to true!
-            MAX_CACHE_AGE_HOURS: 1, // Use live API if static data > 4 hours old
-            AUTO_REFRESH_MINUTES: 20,
-            RETRY_ATTEMPTS: 3
+            // Hybrid behavior settings
+            ENABLE_LIVE_FALLBACK: false, // Set to true after adding API credentials
+            MAX_CACHE_AGE_HOURS: 4, // Use live API if static data is older than this
+
+            // Performance settings
+            AUTO_REFRESH_MINUTES: 20, // How often to auto-refresh page
+            RETRY_ATTEMPTS: 3 // How many times to retry failed requests
         };
 
         // Global variables
@@ -461,26 +765,88 @@
         let isLoading = true;
 
         // ====================================
-        // MAIN DATA FETCHING LOGIC
+        // MAIN DATA FETCHING LOGIC (TRUE HYBRID)
         // ====================================
         async function fetchCalendarEvents() {
-            console.log('🔍 Starting calendar data fetch...');
+            console.log('🔍 Starting hybrid calendar data fetch...');
 
             try {
-                // Get static data from GitHub Actions
-                console.log('📁 Fetching static data from GitHub Actions...');
+                // STEP 1: Always try to get static data first
+                console.log('📁 Attempting to fetch static data from GitHub Actions...');
                 const staticData = await fetchStaticCalendarData();
 
-                console.log('✅ Using static data from GitHub Actions');
-                updateStatus('live', `Calendar loaded • ${staticData.totalEvents || staticData.events.length} events • Auto-updates every 2h`);
+                // STEP 2: Check if static data is fresh enough
+                const dataAge = calculateDataAge(staticData.lastUpdated);
+                console.log(`⏰ Static data age: ${dataAge.hours} hours, ${dataAge.minutes} minutes`);
+
+                if (dataAge.hours < CONFIG.MAX_CACHE_AGE_HOURS) {
+                    // Static data is fresh - use it!
+                    console.log('✅ Using fresh static data');
+                    updateStatus('live', `Calendar loaded • ${staticData.totalEvents || staticData.events.length} events • Updated ${dataAge.hours}h ago`);
+                    updateLastUpdated(staticData.lastUpdated);
+                    return staticData.events;
+                }
+
+                // STEP 3: Static data is old - try live API if enabled
+                if (CONFIG.ENABLE_LIVE_FALLBACK && CONFIG.GOOGLE_API_KEY && CONFIG.CALENDAR_ID) {
+                    console.log('🔄 Static data is old, fetching live data...');
+                    return await fetchLiveCalendarEvents();
+                }
+
+                // STEP 4: Live API not available - use old static data with warning
+                console.log('⚠️ Using old static data (live API not enabled)');
+                updateStatus('warning', `Calendar loaded • ${staticData.events.length} events • Data is ${dataAge.hours}h old`);
                 updateLastUpdated(staticData.lastUpdated);
                 return staticData.events;
 
             } catch (error) {
-                console.error('❌ Failed to load calendar data:', error);
+                console.error('❌ All data sources failed:', error);
                 updateStatus('error', 'Failed to load calendar data');
                 throw error;
             }
+        }
+
+        // ====================================
+        // LIVE API SOURCE (HYBRID FALLBACK)
+        // ====================================
+        async function fetchLiveCalendarEvents() {
+            updateStatus('upcoming', '🔄 Loading live calendar data...');
+
+            const now = new Date().toISOString();
+            const future = new Date(Date.now() + 3 * 30 * 24 * 60 * 60 * 1000).toISOString(); // 3 months
+
+            const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CONFIG.CALENDAR_ID)}/events?key=${CONFIG.GOOGLE_API_KEY}&timeMin=${now}&timeMax=${future}&singleEvents=true&orderBy=startTime&maxResults=50`;
+
+            const response = await fetch(url);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`Google API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+            }
+
+            const data = await response.json();
+            const events = data.items ? data.items.map(event => ({
+                id: event.id,
+                title: event.summary || 'Untitled Event',
+                description: (event.description || '').replace(/<[^>]*>/g, '').substring(0, 300),
+                start: event.start ? (event.start.dateTime || event.start.date) : null,
+                end: event.end ? (event.end.dateTime || event.end.date) : null,
+                location: event.location || '',
+                htmlLink: event.htmlLink || '',
+                created: event.created,
+                updated: event.updated
+            })).filter(event => event.start) : [];
+
+            console.log(`🔴 Live API data loaded: ${events.length} events`);
+            updateStatus('live', `Live calendar loaded • ${events.length} events • Real-time data ⚡`);
+
+            calendarData = {
+                lastUpdated: new Date().toISOString(),
+                events: events,
+                source: 'live-api'
+            };
+            updateLastUpdated(calendarData.lastUpdated);
+
+            return events;
         }
 
         // ====================================
@@ -556,7 +922,7 @@
         }
 
         // ====================================
-        // EVENT PROCESSING FUNCTIONS
+        // ENHANCED EVENT PROCESSING FUNCTIONS
         // ====================================
 
         // Get upcoming events from fetched data
@@ -569,100 +935,219 @@
                     return eventDate >= now;
                 })
                 .sort((a, b) => new Date(a.start) - new Date(b.start))
-                .slice(0, 5); // Show next 5 upcoming events
+                .slice(0, 6); // Show next 6 upcoming events for better display
         }
 
-        // Format date for display
-        function formatDate(dateString) {
+        // Enhanced date formatting with full information
+        function formatEventDate(dateString) {
             const date = new Date(dateString);
             const today = new Date();
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
 
-            // Check if it's today or tomorrow
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            };
+
             if (date.toDateString() === today.toDateString()) {
-                return "Today";
+                return "Today, " + date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
             } else if (date.toDateString() === tomorrow.toDateString()) {
-                return "Tomorrow";
+                return "Tomorrow, " + date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
             } else {
-                return date.toLocaleDateString('en-US', {
-                    weekday: 'short',
-                    month: 'short',
-                    day: 'numeric'
-                });
+                return date.toLocaleDateString('en-US', options);
             }
         }
 
-        // Get time from date string
-        function formatTime(dateString) {
+        // Get day number for date block
+        function getDateDay(dateString) {
             const date = new Date(dateString);
-            // If it's an all-day event (no time), return "All day"
+            return date.getDate();
+        }
+
+        // Get month and year for date block
+        function getDateMonthYear(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        }
+
+        // Enhanced time formatting
+        function formatEventTime(dateString) {
             if (dateString.length === 10) return "All day";
 
+            const date = new Date(dateString);
             return date.toLocaleTimeString('en-US', {
-                hour: '2-digit',
+                hour: 'numeric',
                 minute: '2-digit',
-                hour12: false
+                hour12: true
             });
         }
 
-        // Get relative time until event
-        function getTimeUntilEvent(dateString) {
+        // Enhanced countdown with visual categories
+        function getEnhancedTimeUntilEvent(dateString) {
             const now = new Date();
             const eventDate = new Date(dateString);
             const diffTime = eventDate - now;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
 
-            if (diffDays === 0) return "Today";
-            if (diffDays === 1) return "Tomorrow";
-            if (diffDays < 7) return `In ${diffDays} days`;
-            if (diffDays < 30) return `In ${Math.ceil(diffDays / 7)} weeks`;
-            return `In ${Math.ceil(diffDays / 30)} months`;
+            let text, cssClass;
+
+            if (diffDays === 0) {
+                if (diffHours <= 1) {
+                    text = "Starting soon!";
+                } else {
+                    text = `Today in ${diffHours}h`;
+                }
+                cssClass = "countdown-today";
+            } else if (diffDays === 1) {
+                text = "Tomorrow";
+                cssClass = "countdown-tomorrow";
+            } else if (diffDays <= 7) {
+                text = `In ${diffDays} days`;
+                cssClass = "countdown-soon";
+            } else if (diffDays <= 30) {
+                const weeks = Math.ceil(diffDays / 7);
+                text = `In ${weeks} week${weeks > 1 ? 's' : ''}`;
+                cssClass = "countdown-later";
+            } else {
+                const months = Math.ceil(diffDays / 30);
+                text = `In ${months} month${months > 1 ? 's' : ''}`;
+                cssClass = "countdown-later";
+            }
+
+            return { text, cssClass };
         }
 
-        // Determine event type badge
+        // Create Google Calendar add URL
+        function createAddToCalendarUrl(event) {
+            const startDate = new Date(event.start);
+            const endDate = new Date(event.end);
+
+            // Format dates for Google Calendar (YYYYMMDDTHHMMSSZ format)
+            const formatGoogleDate = (date) => {
+                return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            };
+
+            const params = new URLSearchParams({
+                action: 'TEMPLATE',
+                text: event.title,
+                dates: `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`,
+                details: event.description || '',
+                location: event.location || '',
+                ctz: 'Europe/Berlin'
+            });
+
+            return `https://calendar.google.com/calendar/render?${params.toString()}`;
+        }
+
+        // Enhanced event type detection with more categories
         function getEventBadge(title, description = '') {
             const text = (title + ' ' + description).toLowerCase();
 
-            if (text.includes('mass') || text.includes('holy')) return 'mass';
-            if (text.includes('retreat') || text.includes('formation')) return 'retreat';
-            if (text.includes('service') || text.includes('community')) return 'service';
-            if (text.includes('prayer') || text.includes('adoration')) return 'prayer';
-            if (text.includes('youth') || text.includes('fellowship')) return 'youth';
+            if (text.includes('mass') || text.includes('holy') || text.includes('liturgy')) return 'mass';
+            if (text.includes('retreat') || text.includes('formation') || text.includes('workshop')) return 'retreat';
+            if (text.includes('service') || text.includes('volunteer') || text.includes('outreach')) return 'service';
+            if (text.includes('prayer') || text.includes('adoration') || text.includes('rosary')) return 'prayer';
+            if (text.includes('youth') || text.includes('fellowship') || text.includes('social')) return 'youth';
 
             return 'default';
         }
 
-        // Create event card HTML
+        // Create enhanced event card HTML
         function createEventCard(event) {
             const badgeType = getEventBadge(event.title, event.description);
-            const eventTime = formatTime(event.start);
-            const timeUntil = getTimeUntilEvent(event.start);
+            const eventTime = formatEventTime(event.start);
+            const eventDate = formatEventDate(event.start);
+            const dateDay = getDateDay(event.start);
+            const dateMonthYear = getDateMonthYear(event.start);
+            const countdown = getEnhancedTimeUntilEvent(event.start);
+            const addToCalendarUrl = createAddToCalendarUrl(event);
+
+            // Truncate description smartly
+            const description = event.description ?
+                (event.description.length > 120 ?
+                    event.description.substring(0, 117) + '...' :
+                    event.description) : '';
 
             return `
-                <div class="event-card bg-white rounded-lg p-3 sm:p-4 border-l-4 border-indigo-500 shadow-sm">
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-gray-800 text-base sm:text-lg mb-1">${event.title}</h3>
-                            <div class="flex items-center space-x-2">
-                                <span class="event-badge badge-${badgeType}">${badgeType}</span>
-                                <span class="text-xs sm:text-sm text-indigo-600 font-medium">${eventTime}</span>
-                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">${timeUntil}</span>
+                <div class="event-card bg-white shadow-lg">
+                    <div class="event-header">
+                        <div class="relative z-10">
+                            <span class="event-badge badge-${badgeType}">${badgeType}</span>
+                            <div class="event-date-block">
+                                <div class="event-day">${dateDay}</div>
+                                <div class="event-month-year">${dateMonthYear}</div>
+                            </div>
+                            <div class="countdown-badge ${countdown.cssClass}">
+                                ${countdown.text}
                             </div>
                         </div>
                     </div>
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-gray-600 mb-2">
-                        <p class="flex items-center mb-1 sm:mb-0">📅 ${formatDate(event.start)}</p>
-                        ${event.location ? `<p class="flex items-center">📍 ${event.location}</p>` : ''}
+                    
+                    <div class="event-content">
+                        <h3 class="event-title">${event.title}</h3>
+                        
+                        <div class="event-details">
+                            <div class="event-detail-item">
+                                <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <span><strong>${eventDate}</strong></span>
+                            </div>
+                            
+                            <div class="event-detail-item">
+                                <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span><strong>${eventTime}</strong></span>
+                            </div>
+                            
+                            ${event.location ? `
+                                <div class="event-detail-item">
+                                    <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    <span>${event.location}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        ${description ? `
+                            <div class="event-description">
+                                <div class="event-detail-item">
+                                    <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span>${description}</span>
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="event-actions">
+                            <a href="${addToCalendarUrl}" 
+                               target="_blank" 
+                               class="event-action-btn btn-primary">
+                                📅 Add to Calendar
+                            </a>
+                            ${event.htmlLink ? `
+                                <a href="${event.htmlLink}" 
+                                   target="_blank" 
+                                   class="event-action-btn btn-secondary">
+                                    🔗 View Details
+                                </a>
+                            ` : ''}
+                        </div>
                     </div>
-                    ${event.description ? `<p class="text-gray-700 text-sm leading-relaxed">${event.description.substring(0, 150)}${event.description.length > 150 ? '...' : ''}</p>` : ''}
-                    ${event.htmlLink ? `<a href="${event.htmlLink}" target="_blank" class="inline-flex items-center mt-2 text-xs text-indigo-600 hover:text-indigo-800">View in Calendar →</a>` : ''}
                 </div>
             `;
         }
 
         // ====================================
-        // MANUAL REFRESH FUNCTIONALITY
+        // MANUAL REFRESH FUNCTIONALITY (HYBRID)
         // ====================================
         async function refreshCalendar() {
             const refreshBtn = document.getElementById('refresh-btn');
@@ -674,10 +1159,19 @@
                     refreshBtn.disabled = true;
                 }
 
-                console.log('🔄 Manual refresh triggered - reloading static data');
+                console.log('🔄 Manual refresh triggered');
 
-                // Force refresh of static data
-                const events = await fetchCalendarEvents();
+                let events;
+                if (CONFIG.ENABLE_LIVE_FALLBACK && CONFIG.GOOGLE_API_KEY && CONFIG.CALENDAR_ID) {
+                    // Force live API call for immediate updates
+                    console.log('🔴 Forcing live API call for manual refresh');
+                    events = await fetchLiveCalendarEvents();
+                } else {
+                    // Refresh static data with cache bypass
+                    console.log('📁 Refreshing static data');
+                    events = await fetchCalendarEvents();
+                }
+
                 const upcomingEvents = getUpcomingEvents(events);
                 displayEvents(upcomingEvents);
 
@@ -706,7 +1200,7 @@
         // DISPLAY FUNCTIONS
         // ====================================
 
-        // Helper function to display events
+        // Helper function to display events with enhanced layout
         function displayEvents(upcomingEvents) {
             const upcomingEventsContainer = document.getElementById('upcomingEvents');
             const loadingContainer = document.getElementById('loadingEvents');
@@ -714,7 +1208,10 @@
             const errorMessage = document.getElementById('errorMessage');
             const upcomingTitle = document.getElementById('upcomingEventsTitle');
 
-            if (upcomingTitle) upcomingTitle.textContent = `Next ${upcomingEvents.length} upcoming events`;
+            if (upcomingTitle) {
+                const eventText = upcomingEvents.length === 1 ? 'event' : 'events';
+                upcomingTitle.textContent = `${upcomingEvents.length} upcoming ${eventText} • Updated with hybrid system`;
+            }
 
             if (loadingContainer) loadingContainer.style.display = 'none';
 
@@ -724,10 +1221,17 @@
                 if (errorMessage) errorMessage.style.display = 'none';
             } else {
                 if (upcomingEventsContainer) {
+                    // Create enhanced event cards with proper grid layout
                     upcomingEventsContainer.innerHTML = upcomingEvents
                         .map(event => createEventCard(event))
                         .join('');
-                    upcomingEventsContainer.style.display = 'block';
+
+                    // Update grid classes based on number of events
+                    const gridClasses = upcomingEvents.length === 1
+                        ? 'grid gap-6 max-w-2xl mx-auto'
+                        : 'grid gap-6 lg:grid-cols-2 xl:grid-cols-2';
+                    upcomingEventsContainer.className = gridClasses;
+                    upcomingEventsContainer.style.display = 'grid';
                 }
                 if (noEventsMessage) noEventsMessage.style.display = 'none';
                 if (errorMessage) errorMessage.style.display = 'none';
@@ -813,10 +1317,13 @@
 
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', function () {
-            console.log('🚀 Initializing MCYM calendar system...');
-            console.log('⚙️ Configuration: Static-only mode with GitHub Actions');
-            console.log('📋 Data source: GitHub Actions every 2 hours');
-            console.log('🔄 Auto-refresh: Every 20 minutes');
+            console.log('🚀 Initializing MCYM hybrid calendar system...');
+            console.log('⚙️ Configuration:', {
+                liveEnabled: CONFIG.ENABLE_LIVE_FALLBACK,
+                maxCacheAge: CONFIG.MAX_CACHE_AGE_HOURS + 'h',
+                autoRefresh: CONFIG.AUTO_REFRESH_MINUTES + 'm'
+            });
+            console.log('🔄 Data strategy: Static-first with live API fallback');
 
             // Display upcoming events
             displayUpcomingEvents();
