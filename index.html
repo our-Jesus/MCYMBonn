@@ -1,114 +1,721 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCYM Bonn/Köln Events Calendar</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
-        /* Ensure html and body take full height for background */
-        html, body {
-            height: 100%;
-            margin: 0; /* Basic reset */
-            padding: 0; /* Basic reset */
-            font-family: 'Inter', sans-serif; /* Apply font to body */
-        }
-
+        html,
         body {
-             /* No background image here anymore */
-            position: relative; /* Still good for overall page structure if needed */
-        }
-
-        /* Dedicated fixed background div */
-        #page-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
             height: 100%;
-            background-image: url('https://images.unsplash.com/photo-1600679405012-04506d8a15c1?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
-            background-size: cover;
-            background-position: center center;
-            background-attachment: fixed;
-            z-index: -1; /* Place it behind all other content */
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
         }
 
-        /* Overlay for the dedicated background div */
-        #page-background::before {
-            content: "";
+        /* Animated gradient background */
+        body {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Floating particles animation */
+        .particle {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            /* Increased opacity for the page background overlay */
-            background-color: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
         }
 
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
 
-        /* Content sections do not need explicit z-index now,
-           as the #page-background is definitively behind them. */
-        header, main, footer {
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Glass morphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Enhanced card hover effects */
+        .calendar-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .calendar-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Event card animations */
+        .event-card {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Pulsing elements */
+        .pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Calendar iframe styling */
+        .calendar-iframe-container {
             position: relative;
+            width: 100%;
+            height: auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 16px;
         }
-
 
         .calendar-iframe-container iframe {
-            width: 100%;
-            min-height: 600px;
+            width: 100% !important;
+            height: 600px !important;
+            border: none !important;
+            border-radius: 8px;
+            display: block;
         }
+
+        @media (min-width: 640px) {
+            .calendar-iframe-container iframe {
+                height: 650px !important;
+            }
+        }
+
         @media (min-width: 768px) {
             .calendar-iframe-container iframe {
-                min-height: 750px;
+                height: 700px !important;
             }
         }
+
         @media (min-width: 1024px) {
             .calendar-iframe-container iframe {
-                min-height: 900px;
+                height: 800px !important;
             }
+        }
+
+        /* Scroll reveal animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.6s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Glowing border animation */
+        .glow-border {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glow-border::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7, #fd79a8);
+            border-radius: inherit;
+            z-index: -1;
+            animation: borderGlow 3s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes borderGlow {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* Enhanced typography */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Loading animation for events */
+        .loading-skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Status indicators */
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-live {
+            background-color: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        .status-upcoming {
+            background-color: #f59e0b;
+        }
+
+        .status-error {
+            background-color: #ef4444;
+        }
+
+        /* Event type badges */
+        .event-badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .badge-mass {
+            background-color: #ddd6fe;
+            color: #5b21b6;
+        }
+
+        .badge-retreat {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-service {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-prayer {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-youth {
+            background-color: #fed7e2;
+            color: #be185d;
+        }
+
+        .badge-default {
+            background-color: #f3f4f6;
+            color: #374151;
         }
     </style>
 </head>
-<body class="text-gray-800 antialiased">
 
-    <div id="page-background"></div>
+<body class="text-gray-800 antialiased overflow-x-hidden">
 
-    <header class="bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-lg">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 text-center">
-            <div class="flex justify-center items-center mb-3 sm:mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 sm:w-12 sm:h-12 mr-3 text-yellow-300">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12v-.008ZM12 18h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75v-.008ZM9.75 18h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5v-.008ZM7.5 18h.008v.008H7.5v-.008ZM14.25 15h.008v.008H14.25v-.008ZM14.25 18h.008v.008H14.25v-.008ZM16.5 15h.008v.008H16.5v-.008ZM16.5 18h.008v.008H16.5v-.008Z" />
-                </svg>
-                <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">MCYM Bonn/Köln</h1>
+    <!-- Floating particles -->
+    <div id="particles-container" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <header class="relative z-10 glass shadow-2xl">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 text-center">
+            <div class="flex flex-col sm:flex-row justify-center items-center mb-4 sm:mb-6">
+                <div class="relative mb-3 sm:mb-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 sm:mr-4 text-white pulse-slow">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12v-.008ZM12 18h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75v-.008ZM9.75 18h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5v-.008ZM7.5 18h.008v.008H7.5v-.008ZM14.25 15h.008v.008H14.25v-.008ZM14.25 18h.008v.008H14.25v-.008ZM16.5 15h.008v.008H16.5v-.008ZM16.5 18h.008v.008H16.5v-.008Z" />
+                    </svg>
+                    <div class="absolute -inset-2 sm:-inset-3 bg-white/20 rounded-full blur-xl"></div>
+                </div>
+                <h1
+                    class="text-2xl sm:text-4xl lg:text-6xl font-bold tracking-tight text-white text-center sm:text-left">
+                    MCYM <span class="gradient-text block sm:inline">Bonn/Köln</span>
+                </h1>
             </div>
-            <p class="text-lg sm:text-xl font-light">Events Calendar</p>
-            <p class="text-sm sm:text-base text-yellow-200 mt-2">
-                Use this calendar to stay updated on all our upcoming events and activities.
+            <p class="text-lg sm:text-xl lg:text-2xl font-light text-white/90 mb-3 sm:mb-4">Events Calendar</p>
+            <p class="text-sm sm:text-base lg:text-lg text-white/80 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
+                Discover all our upcoming events and activities. Stay connected with the Malankara Catholic Youth
+                Movement community calendar.
             </p>
+
+            <!-- Status indicator -->
+            <div class="flex justify-center items-center mt-6 sm:mt-8">
+                <span id="calendar-status" class="status-indicator status-live"></span>
+                <span class="text-white/80 text-sm" id="status-text">Loading calendar data...</span>
+                <span class="text-white/60 text-xs ml-4" id="last-updated"></span>
+            </div>
+
+            <!-- Quick stats -->
+            <div class="flex justify-center space-x-4 sm:space-x-8 mt-6 sm:mt-8">
+                <div class="text-center">
+                    <div class="text-xl sm:text-2xl font-bold text-white">⛪</div>
+                    <div class="text-xs sm:text-sm text-white/80">Faith Events</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-xl sm:text-2xl font-bold text-white">🌍</div>
+                    <div class="text-xs sm:text-sm text-white/80">Bonn & Köln</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-xl sm:text-2xl font-bold text-white">👥</div>
+                    <div class="text-xs sm:text-sm text-white/80">Youth Community</div>
+                </div>
+            </div>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-10">
+
+        <!-- Upcoming Events Section -->
+        <div class="glass rounded-2xl overflow-hidden shadow-2xl mb-8 reveal">
+            <div class="p-4 sm:p-6 bg-gradient-to-r from-indigo-500/20 to-purple-600/20">
+                <h2 class="text-xl sm:text-2xl font-bold text-white mb-2 text-center">🗓️ Upcoming Events</h2>
+                <p class="text-white/80 text-center text-sm sm:text-base" id="upcomingEventsTitle">Loading events...</p>
+            </div>
+            <div class="p-4 sm:p-6 bg-white/95 backdrop-blur-sm">
+                <div id="upcomingEvents" class="space-y-3 sm:space-y-4" style="display: none;">
+                    <!-- Events will be populated here -->
+                </div>
+                <div id="loadingEvents" class="space-y-3 sm:space-y-4">
+                    <!-- Loading skeletons -->
+                    <div class="loading-skeleton h-16 sm:h-20 rounded-lg"></div>
+                    <div class="loading-skeleton h-16 sm:h-20 rounded-lg"></div>
+                    <div class="loading-skeleton h-16 sm:h-20 rounded-lg"></div>
+                </div>
+                <div id="noEventsMessage" class="text-center py-6 sm:py-8" style="display: none;">
+                    <div class="text-4xl sm:text-6xl mb-3 sm:mb-4">📅</div>
+                    <p class="text-gray-600 text-sm sm:text-base">No upcoming events scheduled.</p>
+                    <p class="text-xs sm:text-sm text-gray-500 mt-2">Check back soon for updates!</p>
+                </div>
+                <div id="errorMessage" class="text-center py-6 sm:py-8" style="display: none;">
+                    <div class="text-4xl sm:text-6xl mb-3 sm:mb-4">⚠️</div>
+                    <p class="text-red-600 text-sm sm:text-base">Unable to load calendar events.</p>
+                    <p class="text-xs sm:text-sm text-gray-500 mt-2">Please try refreshing the page.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full Calendar -->
+        <div class="calendar-card glass rounded-2xl overflow-hidden shadow-2xl glow-border reveal">
+            <div class="p-6 bg-gradient-to-r from-indigo-500/20 to-purple-600/20">
+                <h2 class="text-2xl font-bold text-white mb-2 text-center">📅 Full Event Calendar</h2>
+                <p class="text-white/80 text-center">Click on events for more details</p>
+            </div>
             <div class="calendar-iframe-container">
                 <iframe
                     src="https://calendar.google.com/calendar/embed?src=ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05%40group.calendar.google.com&ctz=Europe%2FBerlin"
-                    style="border: 0;"
-                    frameborder="0"
-                    scrolling="no"
-                    title="MCYM Bonn/Köln Events Calendar">
-                    Your browser does not support iframes. Please visit the calendar directly.
+                    frameborder="0" scrolling="no" title="MCYM Bonn/Köln Events Calendar">
                 </iframe>
+                <noscript>
+                    <p>Your browser does not support iframes. Please visit the calendar directly at:
+                        <a href="https://calendar.google.com/calendar/embed?src=ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05%40group.calendar.google.com&ctz=Europe%2FBerlin"
+                            target="_blank">MCYM Calendar</a>
+                    </p>
+                </noscript>
+            </div>
+        </div>
+
+        <!-- Additional info cards -->
+        <div class="grid md:grid-cols-2 gap-8 mt-12">
+            <div class="glass rounded-xl p-6 text-white reveal">
+                <h3 class="text-xl font-semibold mb-3">🎯 About MCYM</h3>
+                <p class="text-white/80 leading-relaxed">
+                    The Malankara Catholic Youth Movement connects young Catholics in Bonn and Cologne through
+                    faith-based events, retreats, and community service activities.
+                </p>
+            </div>
+            <div class="glass rounded-xl p-6 text-white reveal">
+                <h3 class="text-xl font-semibold mb-3">📱 Stay Connected</h3>
+                <p class="text-white/80 leading-relaxed">
+                    Don't miss any events! Subscribe to our calendar or follow us on social media for the latest updates
+                    and announcements.
+                </p>
+                <div class="mt-4">
+                    <a href="https://calendar.google.com/calendar/embed?src=ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05%40group.calendar.google.com&ctz=Europe%2FBerlin"
+                        target="_blank"
+                        class="inline-flex items-center px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm transition-colors">
+                        🔗 Open Calendar
+                    </a>
+                </div>
             </div>
         </div>
     </main>
 
-    <footer class="py-8 mt-12">
+    <footer class="py-12 mt-16 glass relative z-10">
         <div class="container mx-auto px-6 text-center">
-            <p class="text-gray-700">MCYM Bonn/Köln</p>
+            <div class="flex justify-center items-center mb-4">
+                <div class="w-2 h-2 bg-white rounded-full mx-1 animate-pulse"></div>
+                <div class="w-2 h-2 bg-white rounded-full mx-1 animate-pulse" style="animation-delay: 0.2s;"></div>
+                <div class="w-2 h-2 bg-white rounded-full mx-1 animate-pulse" style="animation-delay: 0.4s;"></div>
+            </div>
+            <p class="text-white font-medium">MCYM Bonn/Köln</p>
+            <p class="text-white/60 text-sm mt-2">Building Faith • Inspiring Youth • Serving Community</p>
         </div>
     </footer>
 
+    <script>
+        // Global variables
+        let calendarData = null;
+        let isLoading = true;
+
+        // Fetch real calendar events from GitHub Actions generated data
+        async function fetchCalendarEvents() {
+            try {
+                const response = await fetch('./data/events.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                calendarData = data;
+                updateStatus('live', `Calendar loaded successfully • ${data.events.length} events found`);
+                updateLastUpdated(data.lastUpdated);
+                return data.events;
+            } catch (error) {
+                console.error('Error fetching calendar events:', error);
+                updateStatus('error', 'Failed to load calendar data');
+                throw error;
+            }
+        }
+
+        // Update status indicator
+        function updateStatus(status, message) {
+            const statusIndicator = document.getElementById('calendar-status');
+            const statusText = document.getElementById('status-text');
+
+            statusIndicator.className = `status-indicator status-${status}`;
+            statusText.textContent = message;
+        }
+
+        // Update last updated time
+        function updateLastUpdated(timestamp) {
+            const lastUpdatedEl = document.getElementById('last-updated');
+            if (timestamp) {
+                const date = new Date(timestamp);
+                const timeAgo = getTimeAgo(date);
+                lastUpdatedEl.textContent = `Updated ${timeAgo}`;
+            }
+        }
+
+        // Get time ago string
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffHours < 1) return 'just now';
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        // Get upcoming events from fetched data
+        function getUpcomingEvents(events) {
+            const now = new Date();
+
+            return events
+                .filter(event => {
+                    const eventDate = new Date(event.start);
+                    return eventDate >= now;
+                })
+                .sort((a, b) => new Date(a.start) - new Date(b.start))
+                .slice(0, 5); // Show next 5 upcoming events
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            // Check if it's today or tomorrow
+            if (date.toDateString() === today.toDateString()) {
+                return "Today";
+            } else if (date.toDateString() === tomorrow.toDateString()) {
+                return "Tomorrow";
+            } else {
+                return date.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            }
+        }
+
+        // Get time from date string
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            // If it's an all-day event (no time), return "All day"
+            if (dateString.length === 10) return "All day";
+
+            return date.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+        }
+
+        // Get relative time until event
+        function getTimeUntilEvent(dateString) {
+            const now = new Date();
+            const eventDate = new Date(dateString);
+            const diffTime = eventDate - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 0) return "Today";
+            if (diffDays === 1) return "Tomorrow";
+            if (diffDays < 7) return `In ${diffDays} days`;
+            if (diffDays < 30) return `In ${Math.ceil(diffDays / 7)} weeks`;
+            return `In ${Math.ceil(diffDays / 30)} months`;
+        }
+
+        // Determine event type badge
+        function getEventBadge(title, description = '') {
+            const text = (title + ' ' + description).toLowerCase();
+
+            if (text.includes('mass') || text.includes('holy')) return 'mass';
+            if (text.includes('retreat') || text.includes('formation')) return 'retreat';
+            if (text.includes('service') || text.includes('community')) return 'service';
+            if (text.includes('prayer') || text.includes('adoration')) return 'prayer';
+            if (text.includes('youth') || text.includes('fellowship')) return 'youth';
+
+            return 'default';
+        }
+
+        // Create event card HTML
+        function createEventCard(event) {
+            const badgeType = getEventBadge(event.title, event.description);
+            const eventTime = formatTime(event.start);
+            const timeUntil = getTimeUntilEvent(event.start);
+
+            return `
+                <div class="event-card bg-white rounded-lg p-3 sm:p-4 border-l-4 border-indigo-500 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-800 text-base sm:text-lg mb-1">${event.title}</h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="event-badge badge-${badgeType}">${badgeType}</span>
+                                <span class="text-xs sm:text-sm text-indigo-600 font-medium">${eventTime}</span>
+                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">${timeUntil}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-gray-600 mb-2">
+                        <p class="flex items-center mb-1 sm:mb-0">📅 ${formatDate(event.start)}</p>
+                        ${event.location ? `<p class="flex items-center">📍 ${event.location}</p>` : ''}
+                    </div>
+                    ${event.description ? `<p class="text-gray-700 text-sm leading-relaxed">${event.description.substring(0, 150)}${event.description.length > 150 ? '...' : ''}</p>` : ''}
+                    ${event.htmlLink ? `<a href="${event.htmlLink}" target="_blank" class="inline-flex items-center mt-2 text-xs text-indigo-600 hover:text-indigo-800">View in Calendar →</a>` : ''}
+                </div>
+            `;
+        }
+
+        // Display upcoming events
+        async function displayUpcomingEvents() {
+            const upcomingEventsContainer = document.getElementById('upcomingEvents');
+            const loadingContainer = document.getElementById('loadingEvents');
+            const noEventsMessage = document.getElementById('noEventsMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const upcomingTitle = document.getElementById('upcomingEventsTitle');
+
+            try {
+                updateStatus('upcoming', 'Loading calendar events...');
+                const events = await fetchCalendarEvents();
+                const upcomingEvents = getUpcomingEvents(events);
+
+                // Update title
+                upcomingTitle.textContent = `Next ${upcomingEvents.length} upcoming events`;
+
+                // Hide loading
+                loadingContainer.style.display = 'none';
+
+                if (upcomingEvents.length === 0) {
+                    noEventsMessage.style.display = 'block';
+                    upcomingEventsContainer.style.display = 'none';
+                    errorMessage.style.display = 'none';
+                } else {
+                    upcomingEventsContainer.innerHTML = upcomingEvents
+                        .map(event => createEventCard(event))
+                        .join('');
+                    upcomingEventsContainer.style.display = 'block';
+                    noEventsMessage.style.display = 'none';
+                    errorMessage.style.display = 'none';
+                }
+
+                isLoading = false;
+
+            } catch (error) {
+                console.error('Error displaying events:', error);
+                loadingContainer.style.display = 'none';
+                errorMessage.style.display = 'block';
+                upcomingEventsContainer.style.display = 'none';
+                noEventsMessage.style.display = 'none';
+                isLoading = false;
+            }
+        }
+
+        // Create floating particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+
+            const size = Math.random() * 6 + 4;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+            particle.style.animationDelay = Math.random() * 5 + 's';
+
+            document.getElementById('particles-container').appendChild(particle);
+
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 25000);
+        }
+
+        // Create particles periodically
+        setInterval(createParticle, 3000);
+
+        // Create initial particles
+        for (let i = 0; i < 5; i++) {
+            setTimeout(createParticle, i * 1000);
+        }
+
+        // Scroll reveal animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            // Display upcoming events
+            displayUpcomingEvents();
+
+            // Calendar iframe interaction
+            const calendarContainer = document.querySelector('.calendar-iframe-container');
+            if (calendarContainer) {
+                calendarContainer.addEventListener('mouseenter', function () {
+                    this.style.transform = 'scale(1.01)';
+                });
+                calendarContainer.addEventListener('mouseleave', function () {
+                    this.style.transform = 'scale(1)';
+                });
+            }
+        });
+
+        // Smooth scroll for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Auto-refresh events every 30 minutes
+        setInterval(() => {
+            if (!isLoading) {
+                displayUpcomingEvents();
+            }
+        }, 30 * 60 * 1000);
+    </script>
+
 </body>
+
 </html>
