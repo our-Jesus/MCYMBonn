@@ -10,44 +10,44 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Custom styles for the iframe container to manage responsive height */
+        /* Custom styles for the iframe container to manage responsive height - FURTHER UPDATED HEIGHTS */
         .calendar-iframe-container iframe {
             width: 100%; /* Make iframe take full width of its container */
-            min-height: 500px; /* Minimum height for very small screens */
+            min-height: 600px; /* Minimum height for very small screens - Increased */
         }
         /* Medium screens and up */
         @media (min-width: 768px) {
             .calendar-iframe-container iframe {
-                min-height: 600px; /* Standard height for tablets and desktops */
+                min-height: 750px; /* Standard height for tablets and desktops - Increased */
             }
         }
         /* Large screens and up */
         @media (min-width: 1024px) {
             .calendar-iframe-container iframe {
-                min-height: 700px; /* Taller height for larger desktop screens */
+                min-height: 900px; /* Taller height for larger desktop screens - Increased */
             }
         }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 antialiased">
 
-    <header class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
+    <header class="bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-lg">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 text-center">
             <div class="flex justify-center items-center mb-3 sm:mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 sm:w-12 sm:h-12 mr-3 text-blue-300">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 sm:w-12 sm:h-12 mr-3 text-yellow-300">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12v-.008ZM12 18h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75v-.008ZM9.75 18h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5v-.008ZM7.5 18h.008v.008H7.5v-.008ZM14.25 15h.008v.008H14.25v-.008ZM14.25 18h.008v.008H14.25v-.008ZM16.5 15h.008v.008H16.5v-.008ZM16.5 18h.008v.008H16.5v-.008Z" />
                 </svg>
                 <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">MCYM Bonn/Köln</h1>
             </div>
             <p class="text-lg sm:text-xl font-light">Events Calendar</p>
+            <p class="text-sm sm:text-base text-yellow-200 mt-2">
+                Use this calendar to stay updated on all our upcoming events and activities.
+            </p>
         </div>
     </header>
 
     <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div class="bg-white shadow-xl rounded-lg overflow-hidden">
-            <!-- The p-0 class on this div ensures the iframe touches the edges of its white container if desired,
-                 or you can add padding like p-4 sm:p-6 lg:p-8 if you want space around the iframe within the card.
-                 For Google Calendar, often having it edge-to-edge within its container looks best. -->
             <div class="calendar-iframe-container">
                 <!-- IMPORTANT:
                     1. Ensure the Google Calendar linked by the 'src' attribute is public.
@@ -64,27 +64,13 @@
             </div>
         </div>
 
-        <div class="mt-10 sm:mt-12 text-center text-gray-600">
-            <p>For more information about MCYM Bonn/Köln, please visit our main website or contact us.</p>
-            <!-- Example link (replace # with actual URL):
-            <p class="mt-2">
-                <a href="#" class="text-blue-600 hover:text-blue-800 underline font-semibold">Visit MCYM Germany</a>
-            </p>
-            -->
-        </div>
-    </main>
+        </main>
 
     <footer class="bg-gray-800 text-gray-400 py-8 mt-12">
         <div class="container mx-auto px-6 text-center">
-            <p>&copy; <span id="currentYear"></span> MCYM Bonn/Köln. All rights reserved.</p>
-            <p class="text-sm text-gray-500 mt-1">Website designed with care.</p>
+            <p>MCYM Bonn/Köln</p>
         </div>
     </footer>
 
-    <script>
-        // Simple script to set the current year in the footer
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
-    </script>
-
-</body>
+    </body>
 </html>
