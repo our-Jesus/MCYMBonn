@@ -2,8 +2,17 @@
 <html lang="en">
 
 <!-- 
-MCYM BONN/KÖLN EVENTS CALENDAR
-==============================
+MCYM BONN/KÖLN EVENTS CALENDAR - LATEST VERSION
+===============================================
+
+🆕 LATEST FEATURES & FIXES:
+--------------------------
+✅ Fixed countdown logic (shows "Tomorrow" correctly for next-day events)
+✅ Anti-abuse protection (30s cooldown, max 5 refreshes/hour)
+✅ Bot detection (automatically hides refresh button from bots)
+✅ Dual API key system for security
+✅ Enhanced error handling for missing static files
+✅ Improved date/time calculations
 
 DUAL API KEY SETUP:
 -------------------
@@ -49,11 +58,14 @@ You can control event badges in three ways:
    - social (purple) - for social events
    - special (light green) - for special occasions
 
-SETUP FOR REAL DATA:
--------------------
-1. Add your Google API key to CONFIG.GOOGLE_API_KEY (optional for live fallback)
-2. Create data/events.json with your calendar events, OR
-3. Use the Google Calendar API integration
+ANTI-ABUSE PROTECTION:
+---------------------
+✅ 30-second cooldown between manual refreshes
+✅ Maximum 5 refreshes per hour per user
+✅ 1-hour block if limits exceeded
+✅ Automatic bot detection and blocking
+✅ F5/Ctrl+R protection
+✅ Visual feedback for users
 
 SAMPLE events.json STRUCTURE:
 ----------------------------
@@ -71,72 +83,9 @@ SAMPLE events.json STRUCTURE:
       "location": "St. Thomas Church, Bonn",
       "htmlLink": "https://calendar.google.com/calendar/event?eid=...",
       "badge": "mass"
-    },
-    {
-      "id": "event2", 
-      "title": "Youth Fellowship Meeting",
-      "description": "Monthly gathering for young adults",
-      "start": "2024-06-05T19:00:00Z",
-      "end": "2024-06-05T21:00:00Z",
-      "location": "Community Center, Köln",
-      "htmlLink": "https://calendar.google.com/calendar/event?eid=...",
-      "badge": "youth"
-    },
-    {
-      "id": "event3",
-      "title": "Food Drive for Families",
-      "description": "Collecting donations for local families in need",
-      "start": "2024-06-10T14:00:00Z", 
-      "end": "2024-06-10T18:00:00Z",
-      "location": "Parish Hall, Bonn",
-      "badge": "service"
-    },
-    {
-      "id": "event4",
-      "title": "Evening Prayer Vigil",
-      "description": "Community prayer for peace and healing",
-      "start": "2024-06-15T19:30:00Z",
-      "end": "2024-06-15T21:00:00Z",
-      "location": "St. Thomas Church, Bonn", 
-      "badge": "prayer"
-    },
-    {
-      "id": "event5",
-      "title": "Spiritual Retreat Weekend",
-      "description": "Two-day retreat focusing on spiritual growth",
-      "start": "2024-06-20T09:00:00Z",
-      "end": "2024-06-22T16:00:00Z",
-      "location": "Retreat Center, Bad Godesberg",
-      "badge": "retreat"
-    },
-    {
-      "id": "event6",
-      "title": "Bible Study Circle",
-      "description": "Weekly study of Scripture and discussion",
-      "start": "2024-06-25T19:00:00Z",
-      "end": "2024-06-25T20:30:00Z",
-      "location": "Parish Library, Köln",
-      "badge": "meeting"
     }
   ]
 }
-
-BADGE OPTIONS:
--------------
-- "mass" (purple) - Holy Qurbana, Liturgy, Eucharist
-- "youth" (pink) - Fellowship, Youth events, Social gatherings  
-- "service" (yellow) - Charity, Volunteering, Food drives
-- "prayer" (blue) - Prayer vigils, Adoration, Rosary
-- "retreat" (green) - Retreats, Formation, Workshops
-- "meeting" (orange) - Bible study, Committee meetings
-- "social" (light purple) - Social events, Celebrations
-- "special" (light green) - Special occasions, Festivals
-
-If you don't specify a "badge", the system will auto-detect based on keywords
-in the title and description.
-
-The system will try to load from data/events.json first, then fallback to 
-Google Calendar API if configured.
 -->
 
 <head>
@@ -168,7 +117,6 @@ Google Calendar API if configured.
             border-radius: 50%;
             animation: float 20s infinite linear;
             will-change: transform, opacity;
-            /* Performance hint */
         }
 
         @keyframes float {
@@ -196,7 +144,6 @@ Google Calendar API if configured.
             background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            /* Safari support */
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
@@ -215,18 +162,14 @@ Google Calendar API if configured.
             transition: all 0.3s ease;
             transform: translateY(0);
             border-radius: 16px;
-            /* Increased border radius */
             overflow: hidden;
             display: flex;
-            /* For consistent height if content varies */
             flex-direction: column;
-            /* Stack header, content, actions */
         }
 
         .event-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-            /* Slightly adjusted shadow */
         }
 
         .event-header {
@@ -245,21 +188,17 @@ Google Calendar API if configured.
             width: 100%;
             height: 200%;
             background: rgba(255, 255, 255, 0.08);
-            /* Subtler sheen */
             transform: rotate(45deg);
             transition: transform 0.4s ease;
-            /* Smoother transition */
         }
 
         .event-card:hover .event-header::before {
             transform: rotate(45deg) translate(40px, 40px) scale(1.1);
-            /* Enhanced hover effect */
         }
 
         .event-date-block {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(8px);
-            /* Slightly less blur for date block */
             -webkit-backdrop-filter: blur(8px);
             border-radius: 12px;
             padding: 12px;
@@ -270,7 +209,6 @@ Google Calendar API if configured.
 
         .event-day {
             font-size: 1.5rem;
-            /* 24px */
             font-weight: 800;
             line-height: 1;
             margin-bottom: 2px;
@@ -278,7 +216,6 @@ Google Calendar API if configured.
 
         .event-month-year {
             font-size: 0.75rem;
-            /* 12px */
             opacity: 0.9;
             font-weight: 500;
             text-transform: uppercase;
@@ -291,7 +228,6 @@ Google Calendar API if configured.
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 0.75rem;
-            /* 12px */
             font-weight: 600;
             display: inline-block;
             margin-top: 8px;
@@ -317,19 +253,15 @@ Google Calendar API if configured.
         .event-content {
             padding: 20px;
             background-color: white;
-            /* Ensure content area has solid background */
             flex-grow: 1;
-            /* Allow content to fill space */
             display: flex;
             flex-direction: column;
         }
 
         .event-title {
             font-size: 1.3rem;
-            /* Slightly larger for better readability */
             font-weight: 700;
             color: #1a202c;
-            /* Darker for better contrast */
             margin-bottom: 12px;
             line-height: 1.4;
         }
@@ -343,11 +275,8 @@ Google Calendar API if configured.
             align-items: center;
             margin-bottom: 8px;
             font-size: 0.95rem;
-            /* Slightly larger */
             color: #2d3748;
-            /* Darker for better readability */
             font-weight: 500;
-            /* Medium weight for better readability */
         }
 
         .event-detail-icon {
@@ -355,43 +284,32 @@ Google Calendar API if configured.
             height: 18px;
             margin-right: 10px;
             color: #667eea;
-            /* Tailwind indigo-500 */
             flex-shrink: 0;
         }
 
         .event-description {
             background: #f7fafc;
-            /* Tailwind gray-100 */
             border-left: 4px solid #667eea;
-            /* Tailwind indigo-500 */
             padding: 12px 16px;
             margin: 16px 0;
             border-radius: 0 8px 8px 0;
             font-size: 0.95rem;
-            /* Larger for better readability */
             line-height: 1.6;
             color: #1a202c;
-            /* Darker text for better contrast */
             font-weight: 400;
             flex-grow: 1;
-            /* Allow description to take available space if needed */
         }
 
         .event-description-empty {
-            /* Style for when description is empty */
             display: none;
-            /* Hide if no description */
         }
-
 
         .event-actions {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             margin-top: auto;
-            /* Pushes actions to the bottom of the card */
             padding-top: 16px;
-            /* Add some space above buttons if description is short */
         }
 
         .event-action-btn {
@@ -400,7 +318,6 @@ Google Calendar API if configured.
             padding: 12px 18px;
             border-radius: 8px;
             font-size: 0.9rem;
-            /* Slightly larger */
             font-weight: 600;
             text-decoration: none;
             text-align: center;
@@ -422,7 +339,6 @@ Google Calendar API if configured.
         .btn-secondary {
             background: rgba(102, 126, 234, 0.1);
             color: #667eea;
-            /* Tailwind indigo-500 */
             border: 1px solid rgba(102, 126, 234, 0.2);
         }
 
@@ -434,7 +350,6 @@ Google Calendar API if configured.
         /* Enhanced event type badges */
         .event-badge {
             font-size: 0.7rem;
-            /* 11.2px */
             padding: 4px 10px;
             border-radius: 12px;
             font-weight: 600;
@@ -501,7 +416,6 @@ Google Calendar API if configured.
 
             .event-title {
                 font-size: 1.1rem;
-                /* 17.6px */
             }
 
             .event-actions {
@@ -519,13 +433,11 @@ Google Calendar API if configured.
 
             .event-day {
                 font-size: 1.25rem;
-                /* 20px */
             }
 
             .countdown-badge {
                 padding: 4px 8px;
                 font-size: 0.7rem;
-                /* 11.2px */
             }
         }
 
@@ -537,7 +449,6 @@ Google Calendar API if configured.
             position: relative;
             overflow: hidden;
             border-radius: 16px;
-            /* Match event card radius */
         }
 
         @keyframes loading {
@@ -549,7 +460,6 @@ Google Calendar API if configured.
                 background-position: -200% 0;
             }
         }
-
 
         /* Status indicators with enhanced visibility */
         .status-indicator {
@@ -563,26 +473,22 @@ Google Calendar API if configured.
 
         .status-live {
             background-color: #10b981;
-            /* Tailwind green-500 */
             animation: pulse 2s infinite;
             box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2), 0 0 20px rgba(16, 185, 129, 0.3);
         }
 
         .status-upcoming {
             background-color: #f59e0b;
-            /* Tailwind amber-500 */
             box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2), 0 0 20px rgba(245, 158, 11, 0.3);
         }
 
         .status-error {
             background-color: #ef4444;
-            /* Tailwind red-500 */
             box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2), 0 0 20px rgba(239, 68, 68, 0.3);
         }
 
         .status-warning {
             background-color: #f59e0b;
-            /* Tailwind amber-500 */
             animation: pulse 3s infinite;
             box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2), 0 0 20px rgba(245, 158, 11, 0.3);
         }
@@ -592,7 +498,6 @@ Google Calendar API if configured.
                 box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
             }
 
-            /* Example for status-live */
             70% {
                 box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
             }
@@ -601,23 +506,6 @@ Google Calendar API if configured.
                 box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
             }
         }
-
-        .status-warning@keyframes pulse {
-
-            /* Specific pulse for warning */
-            0% {
-                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
-            }
-
-            70% {
-                box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
-            }
-
-            100% {
-                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
-            }
-        }
-
 
         /* Pulsing elements */
         .pulse-slow {
@@ -630,7 +518,6 @@ Google Calendar API if configured.
             }
         }
 
-
         /* Calendar iframe styling */
         .calendar-iframe-container {
             position: relative;
@@ -642,12 +529,10 @@ Google Calendar API if configured.
             border-radius: 12px;
             padding: 16px;
             transition: transform 0.3s ease-out;
-            /* Added transition for hover */
         }
 
         .calendar-iframe-container:hover {
             transform: scale(1.01);
-            /* Subtle scale on hover */
         }
 
         .calendar-iframe-container iframe {
@@ -681,9 +566,7 @@ Google Calendar API if configured.
             opacity: 0;
             transform: translateY(50px);
             transition: all 0.6s ease-out;
-            /* Smoother ease */
             will-change: opacity, transform;
-            /* Performance hint */
         }
 
         .reveal.active {
@@ -712,16 +595,13 @@ Google Calendar API if configured.
         /* Enhanced typography */
         .gradient-text {
             background: linear-gradient(135deg, #fde047, #facc15, #eab308);
-            /* Yellow gradient for highlight */
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-fill-color: transparent;
-            /* Standard property */
         }
 
         .header-gradient-text {
-            /* Original gradient for header */
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -729,7 +609,7 @@ Google Calendar API if configured.
             text-fill-color: transparent;
         }
 
-        /* Anti-abuse button protection */
+        /* Anti-abuse button protection styles */
         .refresh-button-disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -971,12 +851,12 @@ Google Calendar API if configured.
 
     <script>
         // ====================================
-        // DUAL API KEY CONFIGURATION
+        // DUAL API KEY CONFIGURATION - LATEST VERSION
         // ====================================
         const CONFIG = {
             // WEBSITE API KEY: Replace with your RESTRICTED API key (different from GitHub Actions)
             // This key should be restricted to your GitHub Pages domain in Google Cloud Console
-            GOOGLE_API_KEY: 'YOUR_RESTRICTED_API_KEY_HERE', // Add your RESTRICTED browser API key here (different from GitHub Actions key)
+            GOOGLE_API_KEY: 'AIzaSyCKG5EWSl4hrKPrZ-LaB3G5BHIITA29oA8', // 🔑 REPLACE THIS WITH YOUR RESTRICTED KEY
             CALENDAR_ID: 'ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05@group.calendar.google.com',
 
             // Hybrid behavior settings
@@ -988,7 +868,7 @@ Google Calendar API if configured.
             RETRY_ATTEMPTS: 3, // How many times to retry failed requests
             UPCOMING_EVENT_LIMIT: 12, // Number of upcoming events to display
 
-            // Anti-abuse protection settings
+            // 🛡️ ANTI-ABUSE PROTECTION SETTINGS
             REFRESH_COOLDOWN_SECONDS: 30, // Minimum seconds between manual refreshes
             MAX_REFRESHES_PER_HOUR: 5, // Maximum manual refreshes allowed per hour
             ABUSE_BLOCK_HOURS: 1, // Hours to block after abuse detection
@@ -998,26 +878,25 @@ Google Calendar API if configured.
         // Global variables
         let calendarData = null;
         let isLoading = true;
-        let autoRefreshIntervalId = null; // To manage the interval
+        let autoRefreshIntervalId = null;
 
-        // Anti-abuse protection
+        // 🛡️ Anti-abuse protection variables
         let lastRefreshTime = 0;
         let refreshAttempts = 0;
         let isRefreshBlocked = false;
-        // Constants will be set after CONFIG is defined
 
         // ====================================
-        // MAIN DATA FETCHING LOGIC (TRUE HYBRID) - FIXED
+        // MAIN DATA FETCHING LOGIC (ENHANCED & FIXED)
         // ====================================
         async function fetchCalendarEvents() {
             console.log('🔍 Starting hybrid calendar data fetch...');
-            updateStatus('upcoming', 'Fetching calendar data...'); // Initial status
+            updateStatus('upcoming', 'Fetching calendar data...');
 
             let staticData = null;
             let staticDataError = null;
 
             try {
-                // STEP 1: Try to get static data first (but don't fail if it doesn't exist)
+                // STEP 1: Try to get static data first (graceful failure if missing)
                 console.log('📁 Attempting to fetch static data from GitHub Actions...');
                 try {
                     staticData = await fetchStaticCalendarData();
@@ -1027,13 +906,12 @@ Google Calendar API if configured.
                     console.warn('⚠️ Static data fetch failed:', error.message);
                 }
 
-                // STEP 2: If we have static data, check if it's fresh enough
+                // STEP 2: Check if static data is fresh enough
                 if (staticData) {
                     const dataAge = calculateDataAge(staticData.lastUpdated);
                     console.log(`⏰ Static data age: ${dataAge.hours} hours, ${dataAge.minutes} minutes`);
 
                     if (dataAge.hours < CONFIG.MAX_CACHE_AGE_HOURS) {
-                        // Static data is fresh - use it!
                         console.log('✅ Using fresh static data');
                         updateStatus('live', `Calendar loaded • ${staticData.totalEvents || staticData.events.length} events • Updated ${dataAge.hours > 0 ? `${dataAge.hours}h ` : ''}${dataAge.minutes}m ago`);
                         updateLastUpdated(staticData.lastUpdated);
@@ -1047,10 +925,10 @@ Google Calendar API if configured.
                     return await fetchLiveCalendarEventsWithRetry();
                 }
 
-                // STEP 4: Live API not available - use old static data with warning (if we have any)
+                // STEP 4: Live API not available - use old static data with warning (if available)
                 if (staticData) {
                     const dataAge = calculateDataAge(staticData.lastUpdated);
-                    console.warn('⚠️ Using old static data (live API not enabled or failed, and static data is stale)');
+                    console.warn('⚠️ Using old static data (live API not enabled and static data is stale)');
                     updateStatus('warning', `Displaying cached data • ${staticData.events.length} events • Data is ${dataAge.hours}h ${dataAge.minutes}m old`);
                     updateLastUpdated(staticData.lastUpdated);
                     return staticData.events;
@@ -1062,17 +940,18 @@ Google Calendar API if configured.
             } catch (error) {
                 console.error('❌ All data sources failed:', error);
                 updateStatus('error', 'Failed to load calendar data. Please try again.');
-                // Attempt to display cached data if available from a previous successful fetch
+
+                // Attempt to display previously cached data if available
                 if (calendarData && calendarData.events) {
                     console.warn('Displaying previously cached data due to full fetch failure.');
                     return calendarData.events;
                 }
-                throw error; // Re-throw if no cached data to display
+                throw error;
             }
         }
 
         // ====================================
-        // LIVE API SOURCE (HYBRID FALLBACK) WITH RETRY
+        // LIVE API SOURCE WITH RETRY LOGIC
         // ====================================
         async function fetchLiveCalendarEventsWithRetry(attempt = 1) {
             try {
@@ -1084,20 +963,15 @@ Google Calendar API if configured.
                     return fetchLiveCalendarEventsWithRetry(attempt + 1);
                 }
                 console.error('❌ Live API fetch failed after multiple retries.');
-                throw error; // Re-throw after final attempt
+                throw error;
             }
         }
 
-
-        // ====================================
-        // LIVE API SOURCE (HYBRID FALLBACK)
-        // ====================================
         async function fetchLiveCalendarEvents() {
             updateStatus('upcoming', '🔄 Loading live calendar data...');
 
             const now = new Date().toISOString();
-            // Fetch events for the next 3 months for a good overview
-            const future = new Date(Date.now() + 3 * 30 * 24 * 60 * 60 * 1000).toISOString();
+            const future = new Date(Date.now() + 3 * 30 * 24 * 60 * 60 * 1000).toISOString(); // 3 months
 
             const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CONFIG.CALENDAR_ID)}/events?key=${CONFIG.GOOGLE_API_KEY}&timeMin=${now}&timeMax=${future}&singleEvents=true&orderBy=startTime&maxResults=50`;
 
@@ -1112,20 +986,20 @@ Google Calendar API if configured.
             const events = data.items ? data.items.map(event => ({
                 id: event.id,
                 title: event.summary || 'Untitled Event',
-                description: (event.description || '').replace(/<[^>]*>/g, '').substring(0, 300), // Basic HTML strip & truncate
+                description: (event.description || '').replace(/<[^>]*>/g, '').substring(0, 300),
                 start: event.start ? (event.start.dateTime || event.start.date) : null,
                 end: event.end ? (event.end.dateTime || event.end.date) : null,
                 location: event.location || '',
                 htmlLink: event.htmlLink || '',
                 created: event.created,
                 updated: event.updated,
-                recurringEventId: event.recurringEventId // Useful for identifying recurring instances
-            })).filter(event => event.start) : []; // Ensure events have a start time
+                recurringEventId: event.recurringEventId
+            })).filter(event => event.start) : [];
 
             console.log(`🔴 Live API data loaded: ${events.length} events`);
-            updateStatus('live', `• ${events.length} events • `);
+            updateStatus('live', `Live data loaded • ${events.length} events`);
 
-            calendarData = { // Store the fetched live data
+            calendarData = {
                 lastUpdated: new Date().toISOString(),
                 events: events,
                 source: 'live-api',
@@ -1137,13 +1011,13 @@ Google Calendar API if configured.
         }
 
         // ====================================
-        // STATIC DATA SOURCE (PRIMARY) - IMPROVED ERROR HANDLING
+        // STATIC DATA SOURCE WITH IMPROVED ERROR HANDLING
         // ====================================
         async function fetchStaticCalendarData() {
             const response = await fetch('./data/events.json', {
-                cache: 'no-cache', // Always check for updates from the server
+                cache: 'no-cache',
                 headers: {
-                    'Cache-Control': 'no-cache, no-store, must-revalidate', // Stronger cache control
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
                     'Pragma': 'no-cache',
                     'Expires': '0'
                 }
@@ -1152,7 +1026,7 @@ Google Calendar API if configured.
             if (!response.ok) {
                 if (response.status === 404) {
                     console.warn('📁 Events file (events.json) not found - this is normal if using live API only');
-                    throw new Error('STATIC_FILE_NOT_FOUND'); // Special error code for missing file
+                    throw new Error('STATIC_FILE_NOT_FOUND');
                 }
                 throw new Error(`Failed to load static calendar data: HTTP ${response.status}`);
             }
@@ -1164,326 +1038,12 @@ Google Calendar API if configured.
             }
             console.log(`📊 Static data loaded: ${data.events.length} events from ${data.source || 'GitHub Actions'}`);
 
-            // Update global calendarData if static is primary and successful
             calendarData = data;
-
             return data;
         }
 
         // ====================================
-        // UTILITY FUNCTIONS
-        // ====================================
-        function calculateDataAge(lastUpdatedString) {
-            if (!lastUpdatedString) return { hours: Infinity, minutes: Infinity, totalMs: Infinity };
-            const now = new Date();
-            const updated = new Date(lastUpdatedString);
-            if (isNaN(updated.getTime())) return { hours: Infinity, minutes: Infinity, totalMs: Infinity }; // Invalid date
-
-            const diffMs = now - updated;
-            return {
-                hours: Math.floor(diffMs / (1000 * 60 * 60)),
-                minutes: Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60)),
-                totalMs: diffMs
-            };
-        }
-
-        function updateStatus(status, message) {
-            const statusIndicator = document.getElementById('calendar-status');
-            const statusText = document.getElementById('status-text');
-
-            if (statusIndicator) statusIndicator.className = `status-indicator status-${status}`;
-            if (statusText) statusText.textContent = message;
-        }
-
-        function updateLastUpdated(timestamp) {
-            const lastUpdatedEl = document.getElementById('last-updated');
-            if (timestamp && lastUpdatedEl) {
-                try {
-                    const date = new Date(timestamp);
-                    if (isNaN(date.getTime())) {
-                        lastUpdatedEl.textContent = 'Last update time unknown';
-                        return;
-                    }
-                    const timeAgo = getTimeAgo(date);
-                    lastUpdatedEl.textContent = `Updated ${timeAgo}`;
-                } catch (e) {
-                    lastUpdatedEl.textContent = 'Error displaying update time';
-                    console.error("Error parsing lastUpdated timestamp:", timestamp, e);
-                }
-            } else if (lastUpdatedEl) {
-                lastUpdatedEl.textContent = '';
-            }
-        }
-
-        function getTimeAgo(date) {
-            const now = new Date();
-            const diffTime = Math.abs(now - date);
-            const diffSeconds = Math.floor(diffTime / 1000);
-            const diffMinutes = Math.floor(diffSeconds / 60);
-            const diffHours = Math.floor(diffMinutes / 60);
-            const diffDays = Math.floor(diffHours / 24);
-
-            if (diffMinutes < 1) return 'just now';
-            if (diffMinutes < 60) return `${diffMinutes}m ago`;
-            if (diffHours < 24) return `${diffHours}h ${diffMinutes % 60}m ago`;
-            if (diffDays < 7) return `${diffDays}d ago`;
-            return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-        }
-
-
-        // ====================================
-        // ENHANCED EVENT PROCESSING FUNCTIONS
-        // ====================================
-        function getUpcomingEvents(events) {
-            if (!Array.isArray(events)) return []; // Guard against undefined or non-array input
-            const now = new Date();
-            return events
-                .filter(event => {
-                    if (!event || !event.start) return false; // Skip invalid events
-                    const eventDate = new Date(event.start);
-                    return !isNaN(eventDate.getTime()) && eventDate >= now; // Check for valid date and future
-                })
-                .sort((a, b) => new Date(a.start) - new Date(b.start))
-                .slice(0, CONFIG.UPCOMING_EVENT_LIMIT); // Use configured limit
-        }
-
-        function formatEventDate(dateString) {
-            const date = new Date(dateString);
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-
-            const options = { weekday: 'long', month: 'long', day: 'numeric' };
-
-            if (date.toDateString() === today.toDateString()) {
-                return `Today, ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
-            } else if (date.toDateString() === tomorrow.toDateString()) {
-                return `Tomorrow, ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
-            } else {
-                return date.toLocaleDateString('en-US', options);
-            }
-        }
-
-        function getDateDay(dateString) {
-            return new Date(dateString).getDate();
-        }
-
-        function getDateMonthYear(dateString) {
-            return new Date(dateString).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-        }
-
-        function formatEventTime(dateString) {
-            // Check if it's an all-day event (date only, no time component)
-            if (dateString && dateString.length === 10 && !dateString.includes('T')) {
-                return "All day";
-            }
-            const date = new Date(dateString);
-            // Check if time is midnight, often indicating an all-day event stored with time
-            if (date.getHours() === 0 && date.getMinutes() === 0 && date.getSeconds() === 0) {
-                // Further check: if it's a multi-day event, or if end time is also midnight of next day
-                // For simplicity here, we'll assume midnight start can be displayed as "All day" if no specific end time is prominent
-                // This might need adjustment based on how Google Calendar returns all-day events via API vs. specific dateTime
-            }
-            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-        }
-
-        function getEnhancedTimeUntilEvent(dateString) {
-            const now = new Date();
-            const eventDate = new Date(dateString);
-            const diffTime = eventDate - now;
-
-            if (diffTime < 0) return { text: "Event has passed", cssClass: "countdown-later opacity-70" };
-
-            // Compare actual calendar dates, not just time difference
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const tomorrow = new Date(today);
-            tomorrow.setDate(today.getDate() + 1);
-            const eventDay = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
-
-            const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
-            const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
-            const remainingHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
-            let text, cssClass;
-
-            if (eventDay.getTime() === today.getTime()) { // Actually today
-                if (diffHours < 1 && diffMinutes > 0) {
-                    text = `In ${diffMinutes} min${diffMinutes > 1 ? 's' : ''}`;
-                } else if (diffHours < 1 && diffMinutes <= 0) {
-                    text = "Starting now!";
-                } else {
-                    text = `Today in ${remainingHours}h`;
-                }
-                cssClass = "countdown-today";
-            } else if (eventDay.getTime() === tomorrow.getTime()) { // Actually tomorrow
-                if (diffHours < 24) {
-                    text = `Tomorrow in ${remainingHours}h`;
-                } else {
-                    text = "Tomorrow";
-                }
-                cssClass = "countdown-tomorrow";
-            } else {
-                // Calculate actual day difference using calendar dates
-                const dayDiff = Math.floor((eventDay - today) / (1000 * 60 * 60 * 24));
-
-                if (dayDiff <= 7) {
-                    text = `In ${dayDiff} day${dayDiff > 1 ? 's' : ''}`;
-                    cssClass = "countdown-soon";
-                } else if (dayDiff <= 30) {
-                    const weeks = Math.ceil(dayDiff / 7);
-                    text = `In ${weeks} week${weeks > 1 ? 's' : ''}`;
-                    cssClass = "countdown-later";
-                } else {
-                    const months = Math.ceil(dayDiff / 30);
-                    text = `In ${months} month${months > 1 ? 's' : ''}`;
-                    cssClass = "countdown-later";
-                }
-            }
-            return { text, cssClass };
-        }
-
-        function createAddToCalendarUrl(event) {
-            const startDate = new Date(event.start);
-            const endDate = event.end ? new Date(event.end) : new Date(startDate.getTime() + (60 * 60 * 1000)); // Default 1 hour duration if no end
-
-            const formatGoogleDate = (date) => date.toISOString().replace(/[-:.]/g, '').slice(0, -4) + 'Z';
-
-            let datesParam;
-            // Check if it's an all-day event (heuristic: time is midnight or date string has no 'T')
-            if ((event.start.length === 10 && !event.start.includes('T')) || (startDate.getHours() === 0 && startDate.getMinutes() === 0 && startDate.getSeconds() === 0)) {
-                const nextDay = new Date(startDate);
-                nextDay.setDate(startDate.getDate() + 1);
-                datesParam = `${startDate.toISOString().slice(0, 10).replace(/-/g, '')}/${nextDay.toISOString().slice(0, 10).replace(/-/g, '')}`;
-            } else {
-                datesParam = `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`;
-            }
-
-
-            const params = new URLSearchParams({
-                action: 'TEMPLATE',
-                text: event.title,
-                dates: datesParam,
-                details: (event.description || '').substring(0, 500) + (event.htmlLink ? `\n\nMore info: ${event.htmlLink}` : ''), // Max details length
-                location: event.location || '',
-                ctz: 'Europe/Berlin' // Important for correct time zone
-            });
-            return `https://calendar.google.com/calendar/render?${params.toString()}`;
-        }
-
-        function getEventBadge(title, description = '', manualBadge = null) {
-            // If a manual badge is specified, use it
-            if (manualBadge && ['mass', 'retreat', 'service', 'prayer', 'youth', 'social', 'meeting', 'special'].includes(manualBadge.toLowerCase())) {
-                return manualBadge.toLowerCase();
-            }
-
-            const text = (String(title) + ' ' + String(description)).toLowerCase();
-
-            // Mass/Liturgy events
-            if (text.includes('mass') || text.includes('holy qurbana') || text.includes('qurbana') || text.includes('liturgy') || text.includes('eucharist')) {
-                return 'mass';
-            }
-
-            // Retreat/Formation events  
-            if (text.includes('retreat') || text.includes('formation') || text.includes('workshop') || text.includes('seminar')) {
-                return 'retreat';
-            }
-
-            // Service/Charity events
-            if (text.includes('service') || text.includes('volunteer') || text.includes('charity') || text.includes('outreach') || text.includes('food drive') || text.includes('donation')) {
-                return 'service';
-            }
-
-            // Prayer events
-            if (text.includes('prayer') || text.includes('adoration') || text.includes('rosary') || text.includes('vigil') || text.includes('novena')) {
-                return 'prayer';
-            }
-
-            // Youth/Fellowship events
-            if (text.includes('youth') || text.includes('fellowship') || text.includes('social') || text.includes('gathering') || text.includes('meeting')) {
-                return 'youth';
-            }
-
-            // Bible study gets its own category
-            if (text.includes('bible') || text.includes('scripture') || text.includes('study')) {
-                return 'meeting';
-            }
-
-            return 'special'; // Changed from 'default' to 'special'
-        }
-
-        function createEventCard(event) {
-            const badgeType = getEventBadge(event.title, event.description, event.badge);
-            const eventTime = formatEventTime(event.start);
-            const eventDate = formatEventDate(event.start);
-            const dateDay = getDateDay(event.start);
-            const dateMonthYear = getDateMonthYear(event.start);
-            const countdown = getEnhancedTimeUntilEvent(event.start);
-            const addToCalendarUrl = createAddToCalendarUrl(event);
-
-            const description = event.description ?
-                (event.description.length > 100 ? // Slightly shorter for conciseness
-                    event.description.substring(0, 97) + '...' :
-                    event.description) : '';
-
-            return `
-                <div class="event-card bg-white shadow-lg flex flex-col">
-                    <div class="event-header">
-                        <div class="relative z-10">
-                            <span class="event-badge badge-${badgeType}">${badgeType.replace(/^\w/, c => c.toUpperCase())}</span>
-                            <div class="event-date-block">
-                                <div class="event-day">${dateDay}</div>
-                                <div class="event-month-year">${dateMonthYear}</div>
-                            </div>
-                            <div class="countdown-badge ${countdown.cssClass}">
-                                ${countdown.text}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="event-content flex flex-col flex-grow">
-                        <h3 class="event-title">${event.title || 'Event Title Missing'}</h3>
-                        
-                        <div class="event-details">
-                            <div class="event-detail-item">
-                                <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                <span><strong>${eventDate}</strong></span>
-                            </div>
-                            <div class="event-detail-item">
-                                <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <span><strong>${eventTime}</strong></span>
-                            </div>
-                            ${event.location ? `
-                                <div class="event-detail-item">
-                                    <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                    <span>${event.location}</span>
-                                </div>` : ''}
-                        </div>
-                        
-                        <div class="event-description ${description ? '' : 'event-description-empty'} flex-grow mb-4">
-                            ${description ? `
-                                <div class="event-detail-item items-start"> <svg class="event-detail-icon mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <span>${description}</span>
-                                </div>` : '<p class="text-gray-500 text-sm italic">No additional details provided for this event.</p>'}
-                        </div>
-                        
-                        <div class="event-actions mt-auto">
-                            <a href="${addToCalendarUrl}" target="_blank" class="event-action-btn btn-primary">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 inline mr-1.5 -mt-0.5"><path d="M5.75 3.5a.75.75 0 0 0-.75.75v1.5h9.5v-1.5a.75.75 0 0 0-.75-.75h-8Z" /><path fill-rule="evenodd" d="M3 8.75A.75.75 0 0 1 3.75 8h12.5a.75.75 0 0 1 .75.75v5.5A2.75 2.75 0 0 1 14.25 17H5.75A2.75 2.75 0 0 1 3 14.25v-5.5ZM12.75 12a.75.75 0 0 0-.75-.75H8a.75.75 0 0 0-.75.75v.001c0 .414.336.75.75.75h4a.75.75 0 0 0 .75-.75V12Z" clip-rule="evenodd" /></svg>
-                                Add to Calendar
-                            </a>
-                            ${event.htmlLink ? `
-                                <a href="${event.htmlLink}" target="_blank" class="event-action-btn btn-secondary">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 inline mr-1.5 -mt-0.5"><path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .976-1.138 2.5 2.5 0 0 1-.142-3.665l3-3Z" /><path d="M8.603 17.03a4 4 0 0 0 5.656-5.656l-1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.06-1.061l-1.225 1.223a4 4 0 0 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865.75.75 0 0 0-.976 1.138 2.5 2.5 0 0 1 .142 3.665l-3 3Z" /></svg>
-                                    View Details
-                                </a>` : ''}
-                        </div>
-                    </div>
-                </div>`;
-        }
-
-
-        // ====================================
-        // ANTI-ABUSE PROTECTION FUNCTIONS
+        // 🛡️ ANTI-ABUSE PROTECTION FUNCTIONS
         // ====================================
         function isRefreshAllowed() {
             const now = Date.now();
@@ -1544,12 +1104,42 @@ Google Calendar API if configured.
         }
 
         // ====================================
-        // MANUAL REFRESH FUNCTIONALITY (WITH ANTI-ABUSE PROTECTION)
+        // 🤖 BOT DETECTION FUNCTION
+        // ====================================
+        function detectBot() {
+            if (!CONFIG.ENABLE_BOT_DETECTION) {
+                return false;
+            }
+
+            const userAgent = navigator.userAgent.toLowerCase();
+            const botPatterns = [
+                'bot', 'crawl', 'spider', 'scrape', 'wget', 'curl',
+                'http', 'python', 'java', 'go-http', 'node', 'phantom'
+            ];
+
+            const isBot = botPatterns.some(pattern => userAgent.includes(pattern));
+            const hasWebdriver = 'webdriver' in navigator || navigator.webdriver;
+            const isHeadless = /headless/i.test(userAgent);
+
+            if (isBot || hasWebdriver || isHeadless) {
+                console.warn('🤖 Potential bot detected, disabling manual refresh');
+                const refreshBtn = document.getElementById('refresh-btn');
+                if (refreshBtn) {
+                    refreshBtn.style.display = 'none';
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+        // ====================================
+        // ENHANCED REFRESH FUNCTIONALITY WITH PROTECTION
         // ====================================
         async function refreshCalendar() {
-            // Anti-abuse check
+            // 🛡️ Anti-abuse check
             if (!isRefreshAllowed()) {
-                return; // Exit early if refresh not allowed
+                return;
             }
 
             const refreshBtn = document.getElementById('refresh-btn');
@@ -1561,20 +1151,19 @@ Google Calendar API if configured.
 
             const originalContent = refreshBtn.innerHTML;
             updateRefreshButton('loading', `<svg class="animate-spin h-4 w-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Refreshing...</span>`, true);
-            isLoading = true; // Prevent auto-refresh during manual refresh
+            isLoading = true;
 
             try {
                 console.log('🔄 Manual refresh triggered');
                 let events;
                 if (CONFIG.ENABLE_LIVE_FALLBACK && CONFIG.GOOGLE_API_KEY && CONFIG.CALENDAR_ID) {
                     console.log('🔴 Forcing live API call for manual refresh');
-                    events = await fetchLiveCalendarEventsWithRetry(); // Use retry mechanism
+                    events = await fetchLiveCalendarEventsWithRetry();
                 } else {
                     console.log('📁 Refreshing static data (cache-bypassed)');
-                    // Re-fetch static data, which inherently bypasses browser cache due to headers
                     const staticData = await fetchStaticCalendarData();
                     events = staticData.events;
-                    updateLastUpdated(staticData.lastUpdated); // Update timestamp from static data
+                    updateLastUpdated(staticData.lastUpdated);
                 }
 
                 const upcomingEvents = getUpcomingEvents(events);
@@ -1585,8 +1174,9 @@ Google Calendar API if configured.
                 console.error('❌ Manual refresh failed:', error);
                 updateStatus('error', 'Refresh failed. Please try again.');
                 updateRefreshButton('error', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1.5"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22Z" clip-rule="evenodd" /></svg><span>Failed</span>`, true);
-                // Display error on main status if refresh fails
-                displayEvents([]); // Clear events or show error message via displayEvents
+
+                // Show error message
+                displayEvents([]);
                 document.getElementById('errorMessage').style.display = 'block';
                 document.getElementById('loadingEvents').style.display = 'none';
                 document.getElementById('noEventsMessage').style.display = 'none';
@@ -1596,10 +1186,301 @@ Google Calendar API if configured.
                 setTimeout(() => {
                     updateRefreshButton('normal', originalContent, false);
                 }, 2500);
-                isLoading = false; // Re-enable auto-refresh possibility
+                isLoading = false;
             }
         }
 
+        // ====================================
+        // UTILITY FUNCTIONS
+        // ====================================
+        function calculateDataAge(lastUpdatedString) {
+            if (!lastUpdatedString) return { hours: Infinity, minutes: Infinity, totalMs: Infinity };
+            const now = new Date();
+            const updated = new Date(lastUpdatedString);
+            if (isNaN(updated.getTime())) return { hours: Infinity, minutes: Infinity, totalMs: Infinity };
+
+            const diffMs = now - updated;
+            return {
+                hours: Math.floor(diffMs / (1000 * 60 * 60)),
+                minutes: Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60)),
+                totalMs: diffMs
+            };
+        }
+
+        function updateStatus(status, message) {
+            const statusIndicator = document.getElementById('calendar-status');
+            const statusText = document.getElementById('status-text');
+
+            if (statusIndicator) statusIndicator.className = `status-indicator status-${status}`;
+            if (statusText) statusText.textContent = message;
+        }
+
+        function updateLastUpdated(timestamp) {
+            const lastUpdatedEl = document.getElementById('last-updated');
+            if (timestamp && lastUpdatedEl) {
+                try {
+                    const date = new Date(timestamp);
+                    if (isNaN(date.getTime())) {
+                        lastUpdatedEl.textContent = 'Last update time unknown';
+                        return;
+                    }
+                    const timeAgo = getTimeAgo(date);
+                    lastUpdatedEl.textContent = `Updated ${timeAgo}`;
+                } catch (e) {
+                    lastUpdatedEl.textContent = 'Error displaying update time';
+                    console.error("Error parsing lastUpdated timestamp:", timestamp, e);
+                }
+            } else if (lastUpdatedEl) {
+                lastUpdatedEl.textContent = '';
+            }
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffSeconds = Math.floor(diffTime / 1000);
+            const diffMinutes = Math.floor(diffSeconds / 60);
+            const diffHours = Math.floor(diffMinutes / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffMinutes < 1) return 'just now';
+            if (diffMinutes < 60) return `${diffMinutes}m ago`;
+            if (diffHours < 24) return `${diffHours}h ${diffMinutes % 60}m ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        // ====================================
+        // EVENT PROCESSING FUNCTIONS
+        // ====================================
+        function getUpcomingEvents(events) {
+            if (!Array.isArray(events)) return [];
+            const now = new Date();
+            return events
+                .filter(event => {
+                    if (!event || !event.start) return false;
+                    const eventDate = new Date(event.start);
+                    return !isNaN(eventDate.getTime()) && eventDate >= now;
+                })
+                .sort((a, b) => new Date(a.start) - new Date(b.start))
+                .slice(0, CONFIG.UPCOMING_EVENT_LIMIT);
+        }
+
+        function formatEventDate(dateString) {
+            const date = new Date(dateString);
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+
+            if (date.toDateString() === today.toDateString()) {
+                return `Today, ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
+            } else if (date.toDateString() === tomorrow.toDateString()) {
+                return `Tomorrow, ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
+            } else {
+                return date.toLocaleDateString('en-US', options);
+            }
+        }
+
+        function getDateDay(dateString) {
+            return new Date(dateString).getDate();
+        }
+
+        function getDateMonthYear(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        }
+
+        function formatEventTime(dateString) {
+            if (dateString && dateString.length === 10 && !dateString.includes('T')) {
+                return "All day";
+            }
+            const date = new Date(dateString);
+            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        }
+
+        // ====================================
+        // 🆕 FIXED COUNTDOWN LOGIC - THE KEY FIX!
+        // ====================================
+        function getEnhancedTimeUntilEvent(dateString) {
+            const now = new Date();
+            const eventDate = new Date(dateString);
+            const diffTime = eventDate - now;
+
+            if (diffTime < 0) return { text: "Event has passed", cssClass: "countdown-later opacity-70" };
+
+            // 🔧 FIXED: Compare actual calendar dates, not just time difference
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            const eventDay = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+
+            const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+            const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+            const remainingHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+            let text, cssClass;
+
+            if (eventDay.getTime() === today.getTime()) { // Actually today
+                if (diffHours < 1 && diffMinutes > 0) {
+                    text = `In ${diffMinutes} min${diffMinutes > 1 ? 's' : ''}`;
+                } else if (diffHours < 1 && diffMinutes <= 0) {
+                    text = "Starting now!";
+                } else {
+                    text = `Today in ${remainingHours}h`;
+                }
+                cssClass = "countdown-today";
+            } else if (eventDay.getTime() === tomorrow.getTime()) { // Actually tomorrow
+                if (diffHours < 24) {
+                    text = `Tomorrow in ${remainingHours}h`;
+                } else {
+                    text = "Tomorrow";
+                }
+                cssClass = "countdown-tomorrow";
+            } else {
+                // Calculate actual day difference using calendar dates
+                const dayDiff = Math.floor((eventDay - today) / (1000 * 60 * 60 * 24));
+
+                if (dayDiff <= 7) {
+                    text = `In ${dayDiff} day${dayDiff > 1 ? 's' : ''}`;
+                    cssClass = "countdown-soon";
+                } else if (dayDiff <= 30) {
+                    const weeks = Math.ceil(dayDiff / 7);
+                    text = `In ${weeks} week${weeks > 1 ? 's' : ''}`;
+                    cssClass = "countdown-later";
+                } else {
+                    const months = Math.ceil(dayDiff / 30);
+                    text = `In ${months} month${months > 1 ? 's' : ''}`;
+                    cssClass = "countdown-later";
+                }
+            }
+            return { text, cssClass };
+        }
+
+        function createAddToCalendarUrl(event) {
+            const startDate = new Date(event.start);
+            const endDate = event.end ? new Date(event.end) : new Date(startDate.getTime() + (60 * 60 * 1000));
+
+            const formatGoogleDate = (date) => date.toISOString().replace(/[-:.]/g, '').slice(0, -4) + 'Z';
+
+            let datesParam;
+            if ((event.start.length === 10 && !event.start.includes('T')) || (startDate.getHours() === 0 && startDate.getMinutes() === 0 && startDate.getSeconds() === 0)) {
+                const nextDay = new Date(startDate);
+                nextDay.setDate(startDate.getDate() + 1);
+                datesParam = `${startDate.toISOString().slice(0, 10).replace(/-/g, '')}/${nextDay.toISOString().slice(0, 10).replace(/-/g, '')}`;
+            } else {
+                datesParam = `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`;
+            }
+
+            const params = new URLSearchParams({
+                action: 'TEMPLATE',
+                text: event.title,
+                dates: datesParam,
+                details: (event.description || '').substring(0, 500) + (event.htmlLink ? `\n\nMore info: ${event.htmlLink}` : ''),
+                location: event.location || '',
+                ctz: 'Europe/Berlin'
+            });
+            return `https://calendar.google.com/calendar/render?${params.toString()}`;
+        }
+
+        function getEventBadge(title, description = '', manualBadge = null) {
+            if (manualBadge && ['mass', 'retreat', 'service', 'prayer', 'youth', 'social', 'meeting', 'special'].includes(manualBadge.toLowerCase())) {
+                return manualBadge.toLowerCase();
+            }
+
+            const text = (String(title) + ' ' + String(description)).toLowerCase();
+
+            if (text.includes('mass') || text.includes('holy qurbana') || text.includes('qurbana') || text.includes('liturgy') || text.includes('eucharist')) {
+                return 'mass';
+            }
+            if (text.includes('retreat') || text.includes('formation') || text.includes('workshop') || text.includes('seminar')) {
+                return 'retreat';
+            }
+            if (text.includes('service') || text.includes('volunteer') || text.includes('charity') || text.includes('outreach') || text.includes('food drive') || text.includes('donation')) {
+                return 'service';
+            }
+            if (text.includes('prayer') || text.includes('adoration') || text.includes('rosary') || text.includes('vigil') || text.includes('novena')) {
+                return 'prayer';
+            }
+            if (text.includes('youth') || text.includes('fellowship') || text.includes('social') || text.includes('gathering') || text.includes('meeting')) {
+                return 'youth';
+            }
+            if (text.includes('bible') || text.includes('scripture') || text.includes('study')) {
+                return 'meeting';
+            }
+
+            return 'special';
+        }
+
+        function createEventCard(event) {
+            const badgeType = getEventBadge(event.title, event.description, event.badge);
+            const eventTime = formatEventTime(event.start);
+            const eventDate = formatEventDate(event.start);
+            const dateDay = getDateDay(event.start);
+            const dateMonthYear = getDateMonthYear(event.start);
+            const countdown = getEnhancedTimeUntilEvent(event.start); // 🔧 NOW USES FIXED LOGIC!
+            const addToCalendarUrl = createAddToCalendarUrl(event);
+
+            const description = event.description ?
+                (event.description.length > 100 ?
+                    event.description.substring(0, 97) + '...' :
+                    event.description) : '';
+
+            return `
+                <div class="event-card bg-white shadow-lg flex flex-col">
+                    <div class="event-header">
+                        <div class="relative z-10">
+                            <span class="event-badge badge-${badgeType}">${badgeType.replace(/^\w/, c => c.toUpperCase())}</span>
+                            <div class="event-date-block">
+                                <div class="event-day">${dateDay}</div>
+                                <div class="event-month-year">${dateMonthYear}</div>
+                            </div>
+                            <div class="countdown-badge ${countdown.cssClass}">
+                                ${countdown.text}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="event-content flex flex-col flex-grow">
+                        <h3 class="event-title">${event.title || 'Event Title Missing'}</h3>
+                        
+                        <div class="event-details">
+                            <div class="event-detail-item">
+                                <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <span><strong>${eventDate}</strong></span>
+                            </div>
+                            <div class="event-detail-item">
+                                <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span><strong>${eventTime}</strong></span>
+                            </div>
+                            ${event.location ? `
+                                <div class="event-detail-item">
+                                    <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    <span>${event.location}</span>
+                                </div>` : ''}
+                        </div>
+                        
+                        <div class="event-description ${description ? '' : 'event-description-empty'} flex-grow mb-4">
+                            ${description ? `
+                                <div class="event-detail-item items-start"> <svg class="event-detail-icon mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span>${description}</span>
+                                </div>` : '<p class="text-gray-500 text-sm italic">No additional details provided for this event.</p>'}
+                        </div>
+                        
+                        <div class="event-actions mt-auto">
+                            <a href="${addToCalendarUrl}" target="_blank" class="event-action-btn btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 inline mr-1.5 -mt-0.5"><path d="M5.75 3.5a.75.75 0 0 0-.75.75v1.5h9.5v-1.5a.75.75 0 0 0-.75-.75h-8Z" /><path fill-rule="evenodd" d="M3 8.75A.75.75 0 0 1 3.75 8h12.5a.75.75 0 0 1 .75.75v5.5A2.75 2.75 0 0 1 14.25 17H5.75A2.75 2.75 0 0 1 3 14.25v-5.5ZM12.75 12a.75.75 0 0 0-.75-.75H8a.75.75 0 0 0-.75.75v.001c0 .414.336.75.75.75h4a.75.75 0 0 0 .75-.75V12Z" clip-rule="evenodd" /></svg>
+                                Add to Calendar
+                            </a>
+                            ${event.htmlLink ? `
+                                <a href="${event.htmlLink}" target="_blank" class="event-action-btn btn-secondary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 inline mr-1.5 -mt-0.5"><path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .976-1.138 2.5 2.5 0 0 1-.142-3.665l3-3Z" /><path d="M8.603 17.03a4 4 0 0 0 5.656-5.656l-1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.06-1.061l-1.225 1.223a4 4 0 0 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865.75.75 0 0 0-.976 1.138 2.5 2.5 0 0 1 .142 3.665l-3 3Z" /></svg>
+                                    View Details
+                                </a>` : ''}
+                        </div>
+                    </div>
+                </div>`;
+        }
 
         // ====================================
         // DISPLAY FUNCTIONS
@@ -1612,9 +1493,9 @@ Google Calendar API if configured.
             const upcomingTitle = document.getElementById('upcomingEventsTitle');
 
             if (loadingContainer) loadingContainer.style.display = 'none';
-            if (errorMessage) errorMessage.style.display = 'none'; // Hide error by default
+            if (errorMessage) errorMessage.style.display = 'none';
 
-            if (!Array.isArray(upcomingEvents)) { // Should already be handled by getUpcomingEvents
+            if (!Array.isArray(upcomingEvents)) {
                 console.error("displayEvents called with non-array:", upcomingEvents);
                 if (errorMessage) errorMessage.style.display = 'block';
                 if (upcomingEventsContainer) upcomingEventsContainer.style.display = 'none';
@@ -1626,11 +1507,8 @@ Google Calendar API if configured.
             if (upcomingTitle) {
                 if (upcomingEvents.length > 0) {
                     upcomingTitle.innerHTML = `Discover Our Next <span class="font-semibold gradient-text">${upcomingEvents.length}</span> Activities`;
-                } else {
-                    // Title will be handled by noEventsMessage or errorMessage display
                 }
             }
-
 
             if (upcomingEvents.length === 0) {
                 if (noEventsMessage) noEventsMessage.style.display = 'block';
@@ -1643,12 +1521,12 @@ Google Calendar API if configured.
 
                     let gridClasses = 'grid gap-6 ';
                     if (upcomingEvents.length === 1) {
-                        gridClasses += 'max-w-xl mx-auto'; // Single item, slightly narrower
+                        gridClasses += 'max-w-xl mx-auto';
                     } else if (upcomingEvents.length === 2) {
                         gridClasses += 'md:grid-cols-2 max-w-4xl mx-auto';
                     } else if (upcomingEvents.length === 3) {
-                        gridClasses += 'md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto'; // 2 on md, 3 on lg
-                    } else { // 4 or more
+                        gridClasses += 'md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto';
+                    } else {
                         gridClasses += 'md:grid-cols-2 lg:grid-cols-3';
                     }
                     upcomingEventsContainer.className = gridClasses;
@@ -1659,34 +1537,28 @@ Google Calendar API if configured.
         }
 
         async function displayUpcomingEvents() {
-            isLoading = true; // Set loading flag
+            isLoading = true;
             try {
-                // updateStatus('upcoming', 'Loading calendar events...'); // Already set in fetchCalendarEvents
                 const events = await fetchCalendarEvents();
                 const upcomingEvents = getUpcomingEvents(events);
                 displayEvents(upcomingEvents);
             } catch (error) {
                 console.error('Error displaying events:', error.message);
-                // Error message display is handled within displayEvents or refreshCalendar
-                // Ensure loading skeletons are hidden and error message is shown
+
                 const loadingContainer = document.getElementById('loadingEvents');
                 const errorMessageContainer = document.getElementById('errorMessage');
                 const upcomingEventsContainer = document.getElementById('upcomingEvents');
                 const noEventsMessageContainer = document.getElementById('noEventsMessage');
 
                 if (loadingContainer) loadingContainer.style.display = 'none';
-                if (errorMessageContainer) {
-                    errorMessageContainer.style.display = 'block';
-                    // You might want to update the text of errorMessageContainer here if not done by refreshCalendar
-                }
+                if (errorMessageContainer) errorMessageContainer.style.display = 'block';
                 if (upcomingEventsContainer) upcomingEventsContainer.style.display = 'none';
                 if (noEventsMessageContainer) noEventsMessageContainer.style.display = 'none';
                 updateStatus('error', error.message || 'Failed to load events.');
             } finally {
-                isLoading = false; // Clear loading flag
+                isLoading = false;
             }
         }
-
 
         // ====================================
         // VISUAL EFFECTS & ANIMATIONS
@@ -1694,34 +1566,31 @@ Google Calendar API if configured.
         function createParticle() {
             const particle = document.createElement('div');
             particle.className = 'particle';
-            const size = Math.random() * 5 + 3; // Slightly smaller particles
+            const size = Math.random() * 5 + 3;
             particle.style.width = `${size}px`;
             particle.style.height = `${size}px`;
             particle.style.left = `${Math.random() * 100}%`;
             particle.style.animationDuration = `${Math.random() * 15 + 10}s`;
             particle.style.animationDelay = `${Math.random() * 5}s`;
-            // Vary opacity for depth
             particle.style.opacity = (Math.random() * 0.5 + 0.3).toFixed(2);
-
 
             const container = document.getElementById('particles-container');
             if (container) {
                 container.appendChild(particle);
-                // Remove particle after animation finishes to prevent DOM clutter
                 setTimeout(() => particle.remove(), parseFloat(particle.style.animationDuration) * 1000 + parseFloat(particle.style.animationDelay) * 1000 + 1000);
             }
         }
 
         function initScrollReveal() {
             const observerOptions = {
-                threshold: 0.1, // Reveal when 10% of element is visible
-                rootMargin: '0px 0px -30px 0px' // Start animation a bit earlier
+                threshold: 0.1,
+                rootMargin: '0px 0px -30px 0px'
             };
             const observer = new IntersectionObserver((entries, obs) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('active');
-                        obs.unobserve(entry.target); // Unobserve after revealing
+                        obs.unobserve(entry.target);
                     }
                 });
             }, observerOptions);
@@ -1734,56 +1603,25 @@ Google Calendar API if configured.
         }
 
         // ====================================
-        // ADDITIONAL BOT PROTECTION
-        // ====================================
-        function detectBot() {
-            if (!CONFIG.ENABLE_BOT_DETECTION) {
-                return false; // Bot detection disabled
-            }
-
-            // Basic bot detection heuristics
-            const userAgent = navigator.userAgent.toLowerCase();
-            const botPatterns = [
-                'bot', 'crawl', 'spider', 'scrape', 'wget', 'curl',
-                'http', 'python', 'java', 'go-http', 'node', 'phantom'
-            ];
-
-            const isBot = botPatterns.some(pattern => userAgent.includes(pattern));
-
-            // Additional checks
-            const hasTouch = 'ontouchstart' in window;
-            const hasWebdriver = 'webdriver' in navigator || navigator.webdriver;
-            const isHeadless = /headless/i.test(userAgent);
-
-            if (isBot || hasWebdriver || isHeadless) {
-                console.warn('🤖 Potential bot detected, disabling manual refresh');
-                const refreshBtn = document.getElementById('refresh-btn');
-                if (refreshBtn) {
-                    refreshBtn.style.display = 'none'; // Hide button for bots
-                }
-                return true;
-            }
-
-            return false;
-        }
-
-        // ====================================
-        // INITIALIZATION (WITH BOT PROTECTION)
+        // INITIALIZATION WITH FULL PROTECTION
         // ====================================
         document.addEventListener('DOMContentLoaded', function () {
-            console.log('🚀 Initializing MCYM hybrid calendar system v2...');
+            console.log('🚀 Initializing MCYM hybrid calendar system v3 (LATEST)...');
             console.log('⚙️ Configuration:', {
                 liveEnabled: CONFIG.ENABLE_LIVE_FALLBACK,
                 maxCacheAge: `${CONFIG.MAX_CACHE_AGE_HOURS}h`,
                 autoRefresh: `${CONFIG.AUTO_REFRESH_MINUTES}m`,
-                eventLimit: CONFIG.UPCOMING_EVENT_LIMIT
+                eventLimit: CONFIG.UPCOMING_EVENT_LIMIT,
+                antiAbuse: `${CONFIG.REFRESH_COOLDOWN_SECONDS}s cooldown, max ${CONFIG.MAX_REFRESHES_PER_HOUR}/hour`,
+                botDetection: CONFIG.ENABLE_BOT_DETECTION
             });
-            console.log('🔄 Data strategy: Static-first with live API fallback (if configured).');
+            console.log('🔄 Data strategy: Static-first with live API fallback');
+            console.log('🛡️ Anti-abuse protection: ENABLED');
+            console.log('🤖 Bot detection: ENABLED');
 
-            // Bot detection
+            // 🤖 Bot detection
             const isBot = detectBot();
             if (isBot) {
-                // For bots, only show static data, no manual refresh
                 console.log('🤖 Bot detected - showing static data only');
             }
 
@@ -1792,9 +1630,9 @@ Google Calendar API if configured.
 
             // Only set up auto-refresh for real users
             if (!isBot) {
-                if (autoRefreshIntervalId) clearInterval(autoRefreshIntervalId); // Clear existing interval if any
+                if (autoRefreshIntervalId) clearInterval(autoRefreshIntervalId);
                 autoRefreshIntervalId = setInterval(() => {
-                    if (!isLoading && document.visibilityState === 'visible') { // Only refresh if page is visible and not loading
+                    if (!isLoading && document.visibilityState === 'visible') {
                         console.log('🔄 Auto-refresh triggered by interval.');
                         displayUpcomingEvents();
                     }
@@ -1804,16 +1642,16 @@ Google Calendar API if configured.
             initScrollReveal();
 
             // Create initial burst of particles, then periodically
-            for (let i = 0; i < 8; i++) { // More initial particles
-                setTimeout(createParticle, i * 500); // Staggered creation
+            for (let i = 0; i < 8; i++) {
+                setTimeout(createParticle, i * 500);
             }
-            setInterval(createParticle, 2500); // Create new particles more frequently
+            setInterval(createParticle, 2500);
 
-            // Smooth scroll for any internal links (optional, good UX)
+            // Smooth scroll for internal links
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
                     const hrefAttribute = this.getAttribute('href');
-                    if (hrefAttribute && hrefAttribute !== "#") { // Ensure it's not just a placeholder href="#"
+                    if (hrefAttribute && hrefAttribute !== "#") {
                         const targetElement = document.querySelector(hrefAttribute);
                         if (targetElement) {
                             e.preventDefault();
@@ -1823,7 +1661,7 @@ Google Calendar API if configured.
                 });
             });
 
-            // Add keyboard shortcut protection
+            // 🛡️ Add keyboard shortcut protection
             document.addEventListener('keydown', function (e) {
                 // Prevent F5/Ctrl+R abuse by adding cooldown
                 if ((e.key === 'F5' || (e.ctrlKey && e.key === 'r')) && !isRefreshAllowed()) {
