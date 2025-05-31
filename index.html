@@ -728,6 +728,21 @@ Google Calendar API if configured.
             background-clip: text;
             text-fill-color: transparent;
         }
+
+        /* Anti-abuse button protection */
+        .refresh-button-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .refresh-button-cooldown {
+            background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+        }
+
+        .refresh-button-blocked {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+        }
     </style>
 </head>
 
@@ -961,7 +976,7 @@ Google Calendar API if configured.
         const CONFIG = {
             // WEBSITE API KEY: Replace with your RESTRICTED API key (different from GitHub Actions)
             // This key should be restricted to your GitHub Pages domain in Google Cloud Console
-            GOOGLE_API_KEY: 'AIzaSyCKG5EWSl4hrKPrZ-LaB3G5BHIITA29oA8', // Add your RESTRICTED browser API key here (different from GitHub Actions key)
+            GOOGLE_API_KEY: 'YOUR_RESTRICTED_API_KEY_HERE', // Add your RESTRICTED browser API key here (different from GitHub Actions key)
             CALENDAR_ID: 'ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05@group.calendar.google.com',
 
             // Hybrid behavior settings
@@ -971,13 +986,25 @@ Google Calendar API if configured.
             // Performance settings
             AUTO_REFRESH_MINUTES: 20, // How often to auto-refresh page
             RETRY_ATTEMPTS: 3, // How many times to retry failed requests
-            UPCOMING_EVENT_LIMIT: 12 // Number of upcoming events to display
+            UPCOMING_EVENT_LIMIT: 12, // Number of upcoming events to display
+
+            // Anti-abuse protection settings
+            REFRESH_COOLDOWN_SECONDS: 30, // Minimum seconds between manual refreshes
+            MAX_REFRESHES_PER_HOUR: 5, // Maximum manual refreshes allowed per hour
+            ABUSE_BLOCK_HOURS: 1, // Hours to block after abuse detection
+            ENABLE_BOT_DETECTION: true // Automatically hide refresh button for detected bots
         };
 
         // Global variables
         let calendarData = null;
         let isLoading = true;
         let autoRefreshIntervalId = null; // To manage the interval
+
+        // Anti-abuse protection
+        let lastRefreshTime = 0;
+        let refreshAttempts = 0;
+        let isRefreshBlocked = false;
+        // Constants will be set after CONFIG is defined
 
         // ====================================
         // MAIN DATA FETCHING LOGIC (TRUE HYBRID) - FIXED
@@ -1456,15 +1483,84 @@ Google Calendar API if configured.
 
 
         // ====================================
-        // MANUAL REFRESH FUNCTIONALITY (HYBRID)
+        // ANTI-ABUSE PROTECTION FUNCTIONS
         // ====================================
-        async function refreshCalendar() {
+        function isRefreshAllowed() {
+            const now = Date.now();
+            const REFRESH_COOLDOWN = CONFIG.REFRESH_COOLDOWN_SECONDS * 1000;
+            const MAX_REFRESH_ATTEMPTS = CONFIG.MAX_REFRESHES_PER_HOUR;
+            const ABUSE_BLOCK_TIME = CONFIG.ABUSE_BLOCK_HOURS * 3600000;
+
+            // Check if currently blocked for abuse
+            if (isRefreshBlocked) {
+                console.warn('🚫 Refresh blocked due to abuse detection');
+                return false;
+            }
+
+            // Check cooldown period
+            if (now - lastRefreshTime < REFRESH_COOLDOWN) {
+                const remainingTime = Math.ceil((REFRESH_COOLDOWN - (now - lastRefreshTime)) / 1000);
+                console.warn(`⏰ Refresh cooldown active. Try again in ${remainingTime} seconds`);
+                updateStatus('warning', `Please wait ${remainingTime}s before refreshing again`);
+                return false;
+            }
+
+            // Reset attempt counter after 1 hour
+            if (now - lastRefreshTime > 3600000) {
+                refreshAttempts = 0;
+            }
+
+            // Check attempt limit
+            if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
+                console.error(`🚫 Too many refresh attempts (${MAX_REFRESH_ATTEMPTS}). Blocking for ${CONFIG.ABUSE_BLOCK_HOURS} hour(s).`);
+                isRefreshBlocked = true;
+                updateStatus('error', `Too many refresh attempts. Please wait ${CONFIG.ABUSE_BLOCK_HOURS} hour(s).`);
+
+                // Unblock after configured time
+                setTimeout(() => {
+                    isRefreshBlocked = false;
+                    refreshAttempts = 0;
+                    console.log('✅ Refresh blocking lifted');
+                }, ABUSE_BLOCK_TIME);
+
+                return false;
+            }
+
+            return true;
+        }
+
+        function updateRefreshButton(state, text, disabled = false) {
             const refreshBtn = document.getElementById('refresh-btn');
             if (!refreshBtn) return;
 
+            refreshBtn.disabled = disabled;
+            refreshBtn.innerHTML = text;
+
+            if (disabled) {
+                refreshBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                refreshBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // ====================================
+        // MANUAL REFRESH FUNCTIONALITY (WITH ANTI-ABUSE PROTECTION)
+        // ====================================
+        async function refreshCalendar() {
+            // Anti-abuse check
+            if (!isRefreshAllowed()) {
+                return; // Exit early if refresh not allowed
+            }
+
+            const refreshBtn = document.getElementById('refresh-btn');
+            if (!refreshBtn) return;
+
+            // Record this refresh attempt
+            lastRefreshTime = Date.now();
+            refreshAttempts++;
+
             const originalContent = refreshBtn.innerHTML;
-            refreshBtn.innerHTML = `<svg class="animate-spin h-4 w-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Refreshing...</span>`;
-            refreshBtn.disabled = true;
+            updateRefreshButton('loading', `<svg class="animate-spin h-4 w-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Refreshing...</span>`, true);
             isLoading = true; // Prevent auto-refresh during manual refresh
 
             try {
@@ -1484,11 +1580,11 @@ Google Calendar API if configured.
                 const upcomingEvents = getUpcomingEvents(events);
                 displayEvents(upcomingEvents);
 
-                refreshBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1.5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Updated!</span>`;
+                updateRefreshButton('success', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1.5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Updated!</span>`, true);
             } catch (error) {
                 console.error('❌ Manual refresh failed:', error);
                 updateStatus('error', 'Refresh failed. Please try again.');
-                refreshBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1.5"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22Z" clip-rule="evenodd" /></svg><span>Failed</span>`;
+                updateRefreshButton('error', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1.5"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22Z" clip-rule="evenodd" /></svg><span>Failed</span>`, true);
                 // Display error on main status if refresh fails
                 displayEvents([]); // Clear events or show error message via displayEvents
                 document.getElementById('errorMessage').style.display = 'block';
@@ -1496,9 +1592,9 @@ Google Calendar API if configured.
                 document.getElementById('noEventsMessage').style.display = 'none';
                 document.getElementById('upcomingEvents').style.display = 'none';
             } finally {
+                // Re-enable button after cooldown
                 setTimeout(() => {
-                    refreshBtn.innerHTML = originalContent;
-                    refreshBtn.disabled = false;
+                    updateRefreshButton('normal', originalContent, false);
                 }, 2500);
                 isLoading = false; // Re-enable auto-refresh possibility
             }
@@ -1638,7 +1734,41 @@ Google Calendar API if configured.
         }
 
         // ====================================
-        // INITIALIZATION
+        // ADDITIONAL BOT PROTECTION
+        // ====================================
+        function detectBot() {
+            if (!CONFIG.ENABLE_BOT_DETECTION) {
+                return false; // Bot detection disabled
+            }
+
+            // Basic bot detection heuristics
+            const userAgent = navigator.userAgent.toLowerCase();
+            const botPatterns = [
+                'bot', 'crawl', 'spider', 'scrape', 'wget', 'curl',
+                'http', 'python', 'java', 'go-http', 'node', 'phantom'
+            ];
+
+            const isBot = botPatterns.some(pattern => userAgent.includes(pattern));
+
+            // Additional checks
+            const hasTouch = 'ontouchstart' in window;
+            const hasWebdriver = 'webdriver' in navigator || navigator.webdriver;
+            const isHeadless = /headless/i.test(userAgent);
+
+            if (isBot || hasWebdriver || isHeadless) {
+                console.warn('🤖 Potential bot detected, disabling manual refresh');
+                const refreshBtn = document.getElementById('refresh-btn');
+                if (refreshBtn) {
+                    refreshBtn.style.display = 'none'; // Hide button for bots
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+        // ====================================
+        // INITIALIZATION (WITH BOT PROTECTION)
         // ====================================
         document.addEventListener('DOMContentLoaded', function () {
             console.log('🚀 Initializing MCYM hybrid calendar system v2...');
@@ -1650,16 +1780,26 @@ Google Calendar API if configured.
             });
             console.log('🔄 Data strategy: Static-first with live API fallback (if configured).');
 
+            // Bot detection
+            const isBot = detectBot();
+            if (isBot) {
+                // For bots, only show static data, no manual refresh
+                console.log('🤖 Bot detected - showing static data only');
+            }
+
             displayUpcomingEvents();
             setFooterYear();
 
-            if (autoRefreshIntervalId) clearInterval(autoRefreshIntervalId); // Clear existing interval if any
-            autoRefreshIntervalId = setInterval(() => {
-                if (!isLoading && document.visibilityState === 'visible') { // Only refresh if page is visible and not loading
-                    console.log('🔄 Auto-refresh triggered by interval.');
-                    displayUpcomingEvents();
-                }
-            }, CONFIG.AUTO_REFRESH_MINUTES * 60 * 1000);
+            // Only set up auto-refresh for real users
+            if (!isBot) {
+                if (autoRefreshIntervalId) clearInterval(autoRefreshIntervalId); // Clear existing interval if any
+                autoRefreshIntervalId = setInterval(() => {
+                    if (!isLoading && document.visibilityState === 'visible') { // Only refresh if page is visible and not loading
+                        console.log('🔄 Auto-refresh triggered by interval.');
+                        displayUpcomingEvents();
+                    }
+                }, CONFIG.AUTO_REFRESH_MINUTES * 60 * 1000);
+            }
 
             initScrollReveal();
 
@@ -1681,6 +1821,15 @@ Google Calendar API if configured.
                         }
                     }
                 });
+            });
+
+            // Add keyboard shortcut protection
+            document.addEventListener('keydown', function (e) {
+                // Prevent F5/Ctrl+R abuse by adding cooldown
+                if ((e.key === 'F5' || (e.ctrlKey && e.key === 'r')) && !isRefreshAllowed()) {
+                    e.preventDefault();
+                    console.warn('⏰ Page refresh blocked due to cooldown');
+                }
             });
         });
     </script>
