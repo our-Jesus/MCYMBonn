@@ -5,6 +5,25 @@
 MCYM BONN/KÖLN EVENTS CALENDAR
 ==============================
 
+DUAL API KEY SETUP:
+-------------------
+This calendar uses TWO different Google API keys for security:
+
+1. UNRESTRICTED KEY (GitHub Actions): Stored in GitHub repository secrets as GOOGLE_API_KEY
+   - Used by GitHub Actions to fetch calendar data
+   - No domain restrictions (needed for GitHub's servers)
+   - Only has Google Calendar API access
+
+2. RESTRICTED KEY (Website): Hardcoded in the CONFIG below
+   - Used by the website for live API calls
+   - Restricted to your GitHub Pages domain
+   - Only has Google Calendar API access
+
+TO SETUP:
+1. Create both keys in Google Cloud Console
+2. Set the unrestricted key in GitHub Secrets
+3. Replace 'YOUR_RESTRICTED_API_KEY_HERE' below with your restricted key
+
 BADGE CUSTOMIZATION GUIDE:
 --------------------------
 You can control event badges in three ways:
@@ -937,11 +956,12 @@ Google Calendar API if configured.
 
     <script>
         // ====================================
-        // HYBRID SYSTEM CONFIGURATION
+        // DUAL API KEY CONFIGURATION
         // ====================================
         const CONFIG = {
-            // HYBRID MODE: Add your API credentials to enable live fallback
-            GOOGLE_API_KEY: 'AIzaSyCKG5EWSl4hrKPrZ-LaB3G5BHIITA29oA8', // Add your RESTRICTED browser API key here
+            // WEBSITE API KEY: Replace with your RESTRICTED API key (different from GitHub Actions)
+            // This key should be restricted to your GitHub Pages domain in Google Cloud Console
+            GOOGLE_API_KEY: 'AIzaSyCKG5EWSl4hrKPrZ-LaB3G5BHIITA29oA8', // Add your RESTRICTED browser API key here (different from GitHub Actions key)
             CALENDAR_ID: 'ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05@group.calendar.google.com',
 
             // Hybrid behavior settings
@@ -1247,37 +1267,50 @@ Google Calendar API if configured.
 
             if (diffTime < 0) return { text: "Event has passed", cssClass: "countdown-later opacity-70" };
 
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+            // Compare actual calendar dates, not just time difference
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            const eventDay = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
 
+            const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+            const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+            const remainingHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
             let text, cssClass;
 
-            if (diffDays === 0) { // Today
+            if (eventDay.getTime() === today.getTime()) { // Actually today
                 if (diffHours < 1 && diffMinutes > 0) {
                     text = `In ${diffMinutes} min${diffMinutes > 1 ? 's' : ''}`;
                 } else if (diffHours < 1 && diffMinutes <= 0) {
                     text = "Starting now!";
-                }
-                else {
-                    text = `Today in ${diffHours}h`;
+                } else {
+                    text = `Today in ${remainingHours}h`;
                 }
                 cssClass = "countdown-today";
-            } else if (diffDays === 1) {
-                text = "Tomorrow";
+            } else if (eventDay.getTime() === tomorrow.getTime()) { // Actually tomorrow
+                if (diffHours < 24) {
+                    text = `Tomorrow in ${remainingHours}h`;
+                } else {
+                    text = "Tomorrow";
+                }
                 cssClass = "countdown-tomorrow";
-            } else if (diffDays <= 7) {
-                text = `In ${diffDays} days`;
-                cssClass = "countdown-soon";
-            } else if (diffDays <= 30) {
-                const weeks = Math.ceil(diffDays / 7);
-                text = `In ${weeks} week${weeks > 1 ? 's' : ''}`;
-                cssClass = "countdown-later";
             } else {
-                const months = Math.ceil(diffDays / 30);
-                text = `In ${months} month${months > 1 ? 's' : ''}`;
-                cssClass = "countdown-later";
+                // Calculate actual day difference using calendar dates
+                const dayDiff = Math.floor((eventDay - today) / (1000 * 60 * 60 * 24));
+
+                if (dayDiff <= 7) {
+                    text = `In ${dayDiff} day${dayDiff > 1 ? 's' : ''}`;
+                    cssClass = "countdown-soon";
+                } else if (dayDiff <= 30) {
+                    const weeks = Math.ceil(dayDiff / 7);
+                    text = `In ${weeks} week${weeks > 1 ? 's' : ''}`;
+                    cssClass = "countdown-later";
+                } else {
+                    const months = Math.ceil(dayDiff / 30);
+                    text = `In ${months} month${months > 1 ? 's' : ''}`;
+                    cssClass = "countdown-later";
+                }
             }
             return { text, cssClass };
         }
