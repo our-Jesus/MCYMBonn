@@ -36,6 +36,86 @@ SETUP FOR REAL DATA:
 2. Create data/events.json with your calendar events, OR
 3. Use the Google Calendar API integration
 
+SAMPLE events.json STRUCTURE:
+----------------------------
+{
+  "lastUpdated": "2024-01-01T10:00:00Z",
+  "totalEvents": 6,
+  "source": "google-calendar-api",
+  "events": [
+    {
+      "id": "event1",
+      "title": "Sunday Holy Qurbana",
+      "description": "Weekly worship service for the community",
+      "start": "2024-06-02T10:00:00Z",
+      "end": "2024-06-02T12:00:00Z",
+      "location": "St. Thomas Church, Bonn",
+      "htmlLink": "https://calendar.google.com/calendar/event?eid=...",
+      "badge": "mass"
+    },
+    {
+      "id": "event2", 
+      "title": "Youth Fellowship Meeting",
+      "description": "Monthly gathering for young adults",
+      "start": "2024-06-05T19:00:00Z",
+      "end": "2024-06-05T21:00:00Z",
+      "location": "Community Center, Köln",
+      "htmlLink": "https://calendar.google.com/calendar/event?eid=...",
+      "badge": "youth"
+    },
+    {
+      "id": "event3",
+      "title": "Food Drive for Families",
+      "description": "Collecting donations for local families in need",
+      "start": "2024-06-10T14:00:00Z", 
+      "end": "2024-06-10T18:00:00Z",
+      "location": "Parish Hall, Bonn",
+      "badge": "service"
+    },
+    {
+      "id": "event4",
+      "title": "Evening Prayer Vigil",
+      "description": "Community prayer for peace and healing",
+      "start": "2024-06-15T19:30:00Z",
+      "end": "2024-06-15T21:00:00Z",
+      "location": "St. Thomas Church, Bonn", 
+      "badge": "prayer"
+    },
+    {
+      "id": "event5",
+      "title": "Spiritual Retreat Weekend",
+      "description": "Two-day retreat focusing on spiritual growth",
+      "start": "2024-06-20T09:00:00Z",
+      "end": "2024-06-22T16:00:00Z",
+      "location": "Retreat Center, Bad Godesberg",
+      "badge": "retreat"
+    },
+    {
+      "id": "event6",
+      "title": "Bible Study Circle",
+      "description": "Weekly study of Scripture and discussion",
+      "start": "2024-06-25T19:00:00Z",
+      "end": "2024-06-25T20:30:00Z",
+      "location": "Parish Library, Köln",
+      "badge": "meeting"
+    }
+  ]
+}
+
+BADGE OPTIONS:
+-------------
+- "mass" (purple) - Holy Qurbana, Liturgy, Eucharist
+- "youth" (pink) - Fellowship, Youth events, Social gatherings  
+- "service" (yellow) - Charity, Volunteering, Food drives
+- "prayer" (blue) - Prayer vigils, Adoration, Rosary
+- "retreat" (green) - Retreats, Formation, Workshops
+- "meeting" (orange) - Bible study, Committee meetings
+- "social" (light purple) - Social events, Celebrations
+- "special" (light green) - Special occasions, Festivals
+
+If you don't specify a "badge", the system will auto-detect based on keywords
+in the title and description.
+
 The system will try to load from data/events.json first, then fallback to 
 Google Calendar API if configured.
 -->
@@ -779,11 +859,34 @@ Google Calendar API if configured.
                     </svg>
                     About MCYM
                 </h3>
-                <p class="text-white text-base leading-relaxed font-medium">
-                    The Malankara Catholic Youth Movement (MCYM) in Bonn and Cologne is a vibrant community connecting
-                    young Catholics. We focus on spiritual growth, fellowship, and service through diverse faith-based
-                    events, enriching retreats, and impactful community activities.
+                <p class="text-white text-base leading-relaxed font-medium mb-4">
+                    The Malankara Catholic Youth Movement (MCYM) is the official youth wing of the globally spread
+                    Syro-Malankara Catholic Church, focusing on the spiritual development of youth aged 15-35 years in
+                    accordance with Catholic teachings and values. Founded in 1971 under Rev Fr Dominic Skariah with the
+                    benediction of Archbishop Benedict Gregorios, MCYM operates at Unit, Regional, Diocesan and Church
+                    levels across India, North America, Germany, and the Middle East.
                 </p>
+                <p class="text-white text-base leading-relaxed font-medium mb-4">
+                    With its Central Secretariat established in 1990 and a unified constitution promulgated in 1992,
+                    MCYM brings together youth from scattered mission regions worldwide to ensure a strong foundation
+                    for the Church through faith formation, spiritual growth, and active participation in church and
+                    community life.
+                </p>
+                <div class="mt-4">
+                    <a href="https://www.malankaracatholic.de/index.php/apostolates/mcym.html" target="_blank"
+                        class="inline-flex items-center px-4 py-2 bg-yellow-400/30 hover:bg-yellow-500/40 text-yellow-100 rounded-lg text-sm font-semibold transition-colors mr-3 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                            class="w-5 h-5 mr-2">
+                            <path fill-rule="evenodd"
+                                d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-3.5a.75.75 0 00-1.5 0v2.75h-7v-7h2.75a.75.75 0 000-1.5h-3.5z"
+                                clip-rule="evenodd" />
+                            <path fill-rule="evenodd"
+                                d="M6.194 12.753a.75.75 0 001.06.053L16.5 4.44v2.81a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.553l-9.056 8.194a.75.75 0 00-.053 1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Learn More About MCYM Germany
+                    </a>
+                </div>
             </div>
             <div class="glass rounded-xl p-6 text-white reveal hover:shadow-lg transition-shadow duration-300">
                 <h3 class="text-xl font-semibold mb-3 flex items-center">
@@ -838,11 +941,11 @@ Google Calendar API if configured.
         // ====================================
         const CONFIG = {
             // HYBRID MODE: Add your API credentials to enable live fallback
-            GOOGLE_API_KEY: '', // Add your RESTRICTED browser API key here
+            GOOGLE_API_KEY: 'AIzaSyCKG5EWSl4hrKPrZ-LaB3G5BHIITA29oA8', // Add your RESTRICTED browser API key here
             CALENDAR_ID: 'ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05@group.calendar.google.com',
 
             // Hybrid behavior settings
-            ENABLE_LIVE_FALLBACK: false, // Set to true after adding API credentials
+            ENABLE_LIVE_FALLBACK: true, // Set to true after adding API credentials
             MAX_CACHE_AGE_HOURS: 2, // Use live API if static data is older than this
 
             // Performance settings
