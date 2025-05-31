@@ -1,41 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- 
+MCYM BONN/KÖLN EVENTS CALENDAR
+==============================
+
+BADGE CUSTOMIZATION GUIDE:
+--------------------------
+You can control event badges in three ways:
+
+1. AUTOMATIC: Based on keywords in event title/description
+   - "Holy Qurbana" → Mass badge  
+   - "Youth Fellowship" → Youth badge
+   - "Food Drive" → Service badge
+   - "Prayer Vigil" → Prayer badge
+   - "Retreat" → Retreat badge
+   - "Bible Study" → Meeting badge
+
+2. MANUAL OVERRIDE: Add "badge" property to your event data
+   Example: { title: "Special Event", badge: "special", ... }
+
+3. AVAILABLE BADGE TYPES:
+   - mass (purple) - for liturgy/qurbana
+   - youth (pink) - for fellowship/youth events  
+   - service (yellow) - for charity/volunteer
+   - prayer (blue) - for prayer/vigil events
+   - retreat (green) - for retreats/formation
+   - meeting (orange) - for study/meetings
+   - social (purple) - for social events
+   - special (light green) - for special occasions
+
+SETUP FOR REAL DATA:
+-------------------
+1. Add your Google API key to CONFIG.GOOGLE_API_KEY (optional for live fallback)
+2. Create data/events.json with your calendar events, OR
+3. Use the Google Calendar API integration
+
+SAMPLE events.json STRUCTURE:
+----------------------------
+{
+  "lastUpdated": "2024-01-01T10:00:00Z",
+  "totalEvents": 6,
+  "source": "google-calendar-api",
+  "events": [
+    {
+      "id": "event1",
+      "title": "Sunday Holy Qurbana",
+      "description": "Weekly worship service for the community",
+      "start": "2024-06-02T10:00:00Z",
+      "end": "2024-06-02T12:00:00Z",
+      "location": "St. Thomas Church, Bonn",
+      "htmlLink": "https://calendar.google.com/calendar/event?eid=...",
+      "badge": "mass"
+    },
+    {
+      "id": "event2", 
+      "title": "Youth Fellowship Meeting",
+      "description": "Monthly gathering for young adults",
+      "start": "2024-06-05T19:00:00Z",
+      "end": "2024-06-05T21:00:00Z",
+      "location": "Community Center, Köln",
+      "htmlLink": "https://calendar.google.com/calendar/event?eid=...",
+      "badge": "youth"
+    },
+    {
+      "id": "event3",
+      "title": "Food Drive for Families",
+      "description": "Collecting donations for local families in need",
+      "start": "2024-06-10T14:00:00Z", 
+      "end": "2024-06-10T18:00:00Z",
+      "location": "Parish Hall, Bonn",
+      "badge": "service"
+    },
+    {
+      "id": "event4",
+      "title": "Evening Prayer Vigil",
+      "description": "Community prayer for peace and healing",
+      "start": "2024-06-15T19:30:00Z",
+      "end": "2024-06-15T21:00:00Z",
+      "location": "St. Thomas Church, Bonn", 
+      "badge": "prayer"
+    },
+    {
+      "id": "event5",
+      "title": "Spiritual Retreat Weekend",
+      "description": "Two-day retreat focusing on spiritual growth",
+      "start": "2024-06-20T09:00:00Z",
+      "end": "2024-06-22T16:00:00Z",
+      "location": "Retreat Center, Bad Godesberg",
+      "badge": "retreat"
+    },
+    {
+      "id": "event6",
+      "title": "Bible Study Circle",
+      "description": "Weekly study of Scripture and discussion",
+      "start": "2024-06-25T19:00:00Z",
+      "end": "2024-06-25T20:30:00Z",
+      "location": "Parish Library, Köln",
+      "badge": "meeting"
+    }
+  ]
+}
+
+BADGE OPTIONS:
+-------------
+- "mass" (purple) - Holy Qurbana, Liturgy, Eucharist
+- "youth" (pink) - Fellowship, Youth events, Social gatherings  
+- "service" (yellow) - Charity, Volunteering, Food drives
+- "prayer" (blue) - Prayer vigils, Adoration, Rosary
+- "retreat" (green) - Retreats, Formation, Workshops
+- "meeting" (orange) - Bible study, Committee meetings
+- "social" (light purple) - Social events, Celebrations
+- "special" (light green) - Special occasions, Festivals
+
+If you don't specify a "badge", the system will auto-detect based on keywords
+in the title and description.
+
+The system will try to load from data/events.json first, then fallback to 
+Google Calendar API if configured.
+-->
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCYM Bonn/Köln Events Calendar</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
     <style>
         html,
         body {
             height: 100%;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
         }
 
-        /* Animated gradient background */
+        /* Static gradient background - no animation */
         body {
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-        }
-
-        @keyframes gradientShift {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
+            background: linear-gradient(-45deg, #667eea, #764ba2, #4ecdc4, #45b7d1);
+            background-attachment: fixed;
         }
 
         /* Floating particles animation */
@@ -44,6 +148,8 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 50%;
             animation: float 20s infinite linear;
+            will-change: transform, opacity;
+            /* Performance hint */
         }
 
         @keyframes float {
@@ -66,11 +172,13 @@
             }
         }
 
-        /* Glass morphism effect */
+        /* Glass morphism effect with better text contrast */
         .glass {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            -webkit-backdrop-filter: blur(10px);
+            /* Safari support */
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         /* Enhanced card hover effects */
@@ -88,12 +196,18 @@
             transition: all 0.3s ease;
             transform: translateY(0);
             border-radius: 16px;
+            /* Increased border radius */
             overflow: hidden;
+            display: flex;
+            /* For consistent height if content varies */
+            flex-direction: column;
+            /* Stack header, content, actions */
         }
 
         .event-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            /* Slightly adjusted shadow */
         }
 
         .event-header {
@@ -111,18 +225,23 @@
             right: -50%;
             width: 100%;
             height: 200%;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+            /* Subtler sheen */
             transform: rotate(45deg);
-            transition: transform 0.3s ease;
+            transition: transform 0.4s ease;
+            /* Smoother transition */
         }
 
         .event-card:hover .event-header::before {
-            transform: rotate(45deg) translate(50px, 50px);
+            transform: rotate(45deg) translate(40px, 40px) scale(1.1);
+            /* Enhanced hover effect */
         }
 
         .event-date-block {
             background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(8px);
+            /* Slightly less blur for date block */
+            -webkit-backdrop-filter: blur(8px);
             border-radius: 12px;
             padding: 12px;
             text-align: center;
@@ -132,6 +251,7 @@
 
         .event-day {
             font-size: 1.5rem;
+            /* 24px */
             font-weight: 800;
             line-height: 1;
             margin-bottom: 2px;
@@ -139,6 +259,7 @@
 
         .event-month-year {
             font-size: 0.75rem;
+            /* 12px */
             opacity: 0.9;
             font-weight: 500;
             text-transform: uppercase;
@@ -151,6 +272,7 @@
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 0.75rem;
+            /* 12px */
             font-weight: 600;
             display: inline-block;
             margin-top: 8px;
@@ -175,14 +297,22 @@
 
         .event-content {
             padding: 20px;
+            background-color: white;
+            /* Ensure content area has solid background */
+            flex-grow: 1;
+            /* Allow content to fill space */
+            display: flex;
+            flex-direction: column;
         }
 
         .event-title {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
+            /* Slightly larger for better readability */
             font-weight: 700;
-            color: #2d3748;
+            color: #1a202c;
+            /* Darker for better contrast */
             margin-bottom: 12px;
-            line-height: 1.3;
+            line-height: 1.4;
         }
 
         .event-details {
@@ -193,8 +323,12 @@
             display: flex;
             align-items: center;
             margin-bottom: 8px;
-            font-size: 0.9rem;
-            color: #4a5568;
+            font-size: 0.95rem;
+            /* Slightly larger */
+            color: #2d3748;
+            /* Darker for better readability */
+            font-weight: 500;
+            /* Medium weight for better readability */
         }
 
         .event-detail-icon {
@@ -202,33 +336,52 @@
             height: 18px;
             margin-right: 10px;
             color: #667eea;
+            /* Tailwind indigo-500 */
             flex-shrink: 0;
         }
 
         .event-description {
             background: #f7fafc;
+            /* Tailwind gray-100 */
             border-left: 4px solid #667eea;
+            /* Tailwind indigo-500 */
             padding: 12px 16px;
             margin: 16px 0;
             border-radius: 0 8px 8px 0;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: #2d3748;
+            font-size: 0.95rem;
+            /* Larger for better readability */
+            line-height: 1.6;
+            color: #1a202c;
+            /* Darker text for better contrast */
+            font-weight: 400;
+            flex-grow: 1;
+            /* Allow description to take available space if needed */
         }
+
+        .event-description-empty {
+            /* Style for when description is empty */
+            display: none;
+            /* Hide if no description */
+        }
+
 
         .event-actions {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            margin-top: 16px;
+            margin-top: auto;
+            /* Pushes actions to the bottom of the card */
+            padding-top: 16px;
+            /* Add some space above buttons if description is short */
         }
 
         .event-action-btn {
             flex: 1;
             min-width: 120px;
-            padding: 10px 16px;
+            padding: 12px 18px;
             border-radius: 8px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            /* Slightly larger */
             font-weight: 600;
             text-decoration: none;
             text-align: center;
@@ -250,6 +403,7 @@
         .btn-secondary {
             background: rgba(102, 126, 234, 0.1);
             color: #667eea;
+            /* Tailwind indigo-500 */
             border: 1px solid rgba(102, 126, 234, 0.2);
         }
 
@@ -261,6 +415,7 @@
         /* Enhanced event type badges */
         .event-badge {
             font-size: 0.7rem;
+            /* 11.2px */
             padding: 4px 10px;
             border-radius: 12px;
             font-weight: 600;
@@ -295,6 +450,21 @@
             color: #be185d;
         }
 
+        .badge-meeting {
+            background: linear-gradient(135deg, #fef0e5, #fed7b2);
+            color: #d97706;
+        }
+
+        .badge-social {
+            background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+            color: #7c3aed;
+        }
+
+        .badge-special {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            color: #166534;
+        }
+
         .badge-default {
             background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
             color: #374151;
@@ -312,6 +482,7 @@
 
             .event-title {
                 font-size: 1.1rem;
+                /* 17.6px */
             }
 
             .event-actions {
@@ -329,11 +500,13 @@
 
             .event-day {
                 font-size: 1.25rem;
+                /* 20px */
             }
 
             .countdown-badge {
                 padding: 4px 8px;
                 font-size: 0.7rem;
+                /* 11.2px */
             }
         }
 
@@ -344,17 +517,20 @@
             animation: loading 1.5s infinite;
             position: relative;
             overflow: hidden;
+            border-radius: 16px;
+            /* Match event card radius */
         }
 
-        .loading-skeleton::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: rgba(0, 0, 0, 0.1);
-            font-size: 2rem;
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
         }
+
 
         /* Status indicators with enhanced visibility */
         .status-indicator {
@@ -368,30 +544,73 @@
 
         .status-live {
             background-color: #10b981;
+            /* Tailwind green-500 */
             animation: pulse 2s infinite;
             box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2), 0 0 20px rgba(16, 185, 129, 0.3);
         }
 
         .status-upcoming {
             background-color: #f59e0b;
+            /* Tailwind amber-500 */
             box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2), 0 0 20px rgba(245, 158, 11, 0.3);
         }
 
         .status-error {
             background-color: #ef4444;
+            /* Tailwind red-500 */
             box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2), 0 0 20px rgba(239, 68, 68, 0.3);
         }
 
         .status-warning {
             background-color: #f59e0b;
+            /* Tailwind amber-500 */
             animation: pulse 3s infinite;
             box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2), 0 0 20px rgba(245, 158, 11, 0.3);
         }
 
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+
+            /* Example for status-live */
+            70% {
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        .status-warning@keyframes pulse {
+
+            /* Specific pulse for warning */
+            0% {
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+            }
+        }
+
+
         /* Pulsing elements */
         .pulse-slow {
-            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            animation: pulse-icon 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+
+        @keyframes pulse-icon {
+            50% {
+                opacity: .5;
+            }
+        }
+
 
         /* Calendar iframe styling */
         .calendar-iframe-container {
@@ -400,8 +619,16 @@
             height: auto;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 16px;
+            transition: transform 0.3s ease-out;
+            /* Added transition for hover */
+        }
+
+        .calendar-iframe-container:hover {
+            transform: scale(1.01);
+            /* Subtle scale on hover */
         }
 
         .calendar-iframe-container iframe {
@@ -434,7 +661,10 @@
         .reveal {
             opacity: 0;
             transform: translateY(50px);
-            transition: all 0.6s ease;
+            transition: all 0.6s ease-out;
+            /* Smoother ease */
+            will-change: opacity, transform;
+            /* Performance hint */
         }
 
         .reveal.active {
@@ -460,132 +690,30 @@
             background: rgba(255, 255, 255, 0.5);
         }
 
-        /* Glowing border animation */
-        .glow-border {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .glow-border::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7, #fd79a8);
-            border-radius: inherit;
-            z-index: -1;
-            animation: borderGlow 3s linear infinite;
-            opacity: 0.7;
-        }
-
-        @keyframes borderGlow {
-
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-        }
-
         /* Enhanced typography */
         .gradient-text {
+            background: linear-gradient(135deg, #fde047, #facc15, #eab308);
+            /* Yellow gradient for highlight */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            /* Standard property */
+        }
+
+        .header-gradient-text {
+            /* Original gradient for header */
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-        }
-
-        /* Loading animation for events */
-        .loading-skeleton {
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-        }
-
-        @keyframes loading {
-            0% {
-                background-position: 200% 0;
-            }
-
-            100% {
-                background-position: -200% 0;
-            }
-        }
-
-        /* Status indicators */
-        .status-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-
-        .status-live {
-            background-color: #10b981;
-            animation: pulse 2s infinite;
-        }
-
-        .status-upcoming {
-            background-color: #f59e0b;
-        }
-
-        .status-error {
-            background-color: #ef4444;
-        }
-
-        .status-warning {
-            background-color: #f59e0b;
-        }
-
-        /* Event type badges */
-        .event-badge {
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-weight: 500;
-        }
-
-        .badge-mass {
-            background-color: #ddd6fe;
-            color: #5b21b6;
-        }
-
-        .badge-retreat {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-
-        .badge-service {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge-prayer {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-
-        .badge-youth {
-            background-color: #fed7e2;
-            color: #be185d;
-        }
-
-        .badge-default {
-            background-color: #f3f4f6;
-            color: #374151;
+            text-fill-color: transparent;
         }
     </style>
 </head>
 
 <body class="text-gray-800 antialiased overflow-x-hidden">
 
-    <!-- Floating particles -->
     <div id="particles-container" class="fixed inset-0 pointer-events-none z-0"></div>
 
     <header class="relative z-10 glass shadow-2xl">
@@ -601,42 +729,44 @@
                     <div class="absolute -inset-2 sm:-inset-3 bg-white/20 rounded-full blur-xl"></div>
                 </div>
                 <h1
-                    class="text-2xl sm:text-4xl lg:text-6xl font-bold tracking-tight text-white text-center sm:text-left">
-                    MCYM <span class="gradient-text block sm:inline">Bonn/Köln</span>
+                    class="text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white text-center sm:text-left">
+                    MCYM <span class="header-gradient-text block sm:inline">Bonn/Köln</span>
                 </h1>
             </div>
-            <p class="text-lg sm:text-xl lg:text-2xl font-light text-white/90 mb-3 sm:mb-4">Events Calendar</p>
-            <p class="text-sm sm:text-base lg:text-lg text-white/80 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
+            <p class="text-lg sm:text-xl lg:text-2xl font-medium text-white mb-3 sm:mb-4">Events Calendar</p>
+            <p
+                class="text-base sm:text-lg lg:text-xl text-white/95 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0 font-medium">
                 Discover all our upcoming events and activities. Stay connected with the Malankara Catholic Youth
                 Movement community calendar.
             </p>
 
-            <!-- Status indicator with refresh button -->
             <div class="flex justify-center items-center mt-6 sm:mt-8 space-x-4">
                 <span id="calendar-status" class="status-indicator status-live"></span>
-                <span class="text-white/80 text-sm" id="status-text">Loading calendar data...</span>
+                <span class="text-white text-sm font-medium" id="status-text">Loading calendar data...</span>
                 <button id="refresh-btn" onclick="refreshCalendar()"
-                    class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-sm text-white transition-colors flex items-center space-x-1"
-                    title="Refresh calendar events">
-                    <span>🔄</span>
+                    class="px-4 py-2 bg-white/25 hover:bg-white/35 rounded-lg text-sm text-white transition-colors flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-white/50 font-medium"
+                    title="Refresh calendar events"> <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
                     <span>Refresh</span>
                 </button>
             </div>
-            <div class="flex justify-center">
-                <span class="text-white/60 text-xs" id="last-updated"></span>
+            <div class="flex justify-center mt-2">
+                <span class="text-white/80 text-xs font-medium" id="last-updated"></span>
             </div>
 
-            <!-- Quick stats -->
             <div class="flex justify-center space-x-4 sm:space-x-8 mt-6 sm:mt-8">
-                <div class="text-center">
+                <div class="text-center p-2 rounded-lg hover:bg-white/10 transition-colors">
                     <div class="text-xl sm:text-2xl font-bold text-white">⛪</div>
                     <div class="text-xs sm:text-sm text-white/80">Faith Events</div>
                 </div>
-                <div class="text-center">
+                <div class="text-center p-2 rounded-lg hover:bg-white/10 transition-colors">
                     <div class="text-xl sm:text-2xl font-bold text-white">🌍</div>
                     <div class="text-xs sm:text-sm text-white/80">Bonn & Köln</div>
                 </div>
-                <div class="text-center">
+                <div class="text-center p-2 rounded-lg hover:bg-white/10 transition-colors">
                     <div class="text-xl sm:text-2xl font-bold text-white">👥</div>
                     <div class="text-xs sm:text-sm text-white/80">Youth Community</div>
                 </div>
@@ -646,84 +776,146 @@
 
     <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-10">
 
-        <!-- Upcoming Events Section -->
-        <div class="glass rounded-2xl overflow-hidden shadow-2xl mb-8 reveal">
+        <div class="glass rounded-2xl overflow-hidden shadow-2xl mb-12 reveal">
             <div class="p-4 sm:p-6 bg-gradient-to-r from-indigo-500/20 to-purple-600/20">
                 <h2 class="text-xl sm:text-2xl font-bold text-white mb-2 text-center">🗓️ Upcoming Events</h2>
-                <p class="text-white/80 text-center text-sm sm:text-base" id="upcomingEventsTitle">Loading events...</p>
-                <p class="text-white/70 text-center text-xs sm:text-sm mt-2">Click "Add to Calendar" to never miss an
-                    event!</p>
+                <p class="text-white text-center text-base sm:text-lg font-medium" id="upcomingEventsTitle">Loading
+                    exciting
+                    events...</p>
+                <p class="text-white/90 text-center text-sm sm:text-base mt-2 font-medium">Click "Add to Calendar" to
+                    save the date!
+                </p>
             </div>
-            <div class="p-4 sm:p-6 bg-white/95 backdrop-blur-sm">
-                <div id="upcomingEvents" class="grid gap-6 lg:grid-cols-2 xl:grid-cols-2" style="display: none;">
-                    <!-- Enhanced events will be populated here -->
+            <div class="p-4 sm:p-6 bg-white/98 backdrop-blur-sm">
+                <div id="upcomingEvents" class="grid gap-6" style="display: none;">
                 </div>
-                <div id="loadingEvents" class="grid gap-6 lg:grid-cols-2 xl:grid-cols-2">
-                    <!-- Loading skeletons -->
-                    <div class="loading-skeleton h-64 rounded-lg"></div>
-                    <div class="loading-skeleton h-64 rounded-lg"></div>
-                    <div class="loading-skeleton h-64 rounded-lg"></div>
-                    <div class="loading-skeleton h-64 rounded-lg"></div>
+                <div id="loadingEvents" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="loading-skeleton h-72"></div>
+                    <div class="loading-skeleton h-72"></div>
+                    <div class="loading-skeleton h-72"></div>
+                    <div class="loading-skeleton h-72"></div>
+                    <div class="loading-skeleton h-72"></div>
+                    <div class="loading-skeleton h-72"></div>
                 </div>
-                <div id="noEventsMessage" class="text-center py-6 sm:py-8" style="display: none;">
-                    <div class="text-4xl sm:text-6xl mb-3 sm:mb-4">📅</div>
-                    <p class="text-gray-600 text-sm sm:text-base font-semibold">No upcoming events scheduled.</p>
-                    <p class="text-xs sm:text-sm text-gray-500 mt-2">Check back soon for updates, or contact the
-                        organizers!</p>
+                <div id="noEventsMessage" class="text-center py-8 sm:py-10" style="display: none;">
+                    <div class="text-4xl sm:text-6xl mb-3 sm:mb-4">🕊️</div>
+                    <p class="text-gray-800 text-lg sm:text-xl font-semibold">No upcoming events scheduled at the
+                        moment.</p>
+                    <p class="text-base sm:text-lg text-gray-600 mt-2 font-medium">Please check back soon for new
+                        activities and
+                        gatherings!</p>
                 </div>
-                <div id="errorMessage" class="text-center py-6 sm:py-8" style="display: none;">
-                    <div class="text-4xl sm:text-6xl mb-3 sm:mb-4">⚠️</div>
-                    <p class="text-red-600 text-sm sm:text-base font-semibold">Unable to load calendar events.</p>
-                    <p class="text-xs sm:text-sm text-gray-500 mt-2">Please try refreshing the page or run the GitHub
-                        Action to generate events data.</p>
+                <div id="errorMessage" class="text-center py-8 sm:py-10" style="display: none;">
+                    <div class="text-4xl sm:text-6xl mb-3 sm:mb-4">😥</div>
+                    <p class="text-red-700 text-lg sm:text-xl font-semibold">Oops! We couldn't load the events.</p>
+                    <p class="text-base sm:text-lg text-gray-600 mt-2 font-medium">Please try refreshing or check your
+                        internet
+                        connection. If the issue persists, the events data might be updating.</p>
                     <button onclick="refreshCalendar()"
-                        class="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors">
-                        🔄 Try Again
+                        class="mt-6 px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium flex items-center justify-center mx-auto shadow-md hover:shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-5 h-5 mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                        Try Again
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Full Calendar -->
-        <div class="calendar-card glass rounded-2xl overflow-hidden shadow-2xl glow-border reveal">
+        <div class="calendar-card glass rounded-2xl overflow-hidden shadow-2xl reveal">
             <div class="p-6 bg-gradient-to-r from-indigo-500/20 to-purple-600/20">
                 <h2 class="text-2xl font-bold text-white mb-2 text-center">📅 Full Event Calendar</h2>
-                <p class="text-white/80 text-center">Click on events for more details</p>
+                <p class="text-white/80 text-center">Explore all activities - click on any event for more details.</p>
             </div>
             <div class="calendar-iframe-container">
                 <iframe
                     src="https://calendar.google.com/calendar/embed?src=ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05%40group.calendar.google.com&ctz=Europe%2FBerlin"
-                    frameborder="0" scrolling="no" title="MCYM Bonn/Köln Events Calendar">
-                </iframe>
+                    frameborder="0" scrolling="no" title="MCYM Bonn/Köln Events Calendar" loading="lazy"> </iframe>
                 <noscript>
-                    <p>Your browser does not support iframes. Please visit the calendar directly at:
-                        <a href="https://calendar.google.com/calendar/embed?src=ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05%40group.calendar.google.com&ctz=Europe%2FBerlin"
-                            target="_blank">MCYM Calendar</a>
-                    </p>
+                    <div class="p-4 text-center text-white">
+                        <p>Your browser does not support iframes, or JavaScript is disabled.</p>
+                        <p>Please visit the calendar directly at:
+                            <a href="https://calendar.google.com/calendar/embed?src=ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05%40group.calendar.google.com&ctz=Europe%2FBerlin"
+                                target="_blank" class="text-yellow-300 hover:text-yellow-400 underline">MCYM
+                                Calendar</a>
+                        </p>
+                    </div>
                 </noscript>
             </div>
         </div>
 
-        <!-- Additional info cards -->
         <div class="grid md:grid-cols-2 gap-8 mt-12">
-            <div class="glass rounded-xl p-6 text-white reveal">
-                <h3 class="text-xl font-semibold mb-3">🎯 About MCYM</h3>
-                <p class="text-white/80 leading-relaxed">
-                    The Malankara Catholic Youth Movement connects young Catholics in Bonn and Cologne through
-                    faith-based events, retreats, and community service activities.
+            <div class="glass rounded-xl p-6 text-white reveal hover:shadow-lg transition-shadow duration-300">
+                <h3 class="text-xl font-semibold mb-3 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                        class="w-6 h-6 mr-2 text-yellow-300">
+                        <path fill-rule="evenodd"
+                            d="M9.315 7.584C12.195 3.883 16.695 1.5 21.75 1.5a.75.75 0 0 1 .75.75c0 5.056-2.383 9.555-6.084 12.436A6.75 6.75 0 0 1 9.75 22.5a.75.75 0 0 1-.75-.75v-4.131A15.838 15.838 0 0 1 6.382 15H2.25a.75.75 0 0 1-.75-.75 6.75 6.75 0 0 1 7.815-6.666ZM15 6.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z"
+                            clip-rule="evenodd" />
+                        <path
+                            d="M5.26 17.242a.75.75 0 1 0-.897-1.203 5.243 5.243 0 0 0-2.05 5.022.75.75 0 0 0 .897 1.203A6.745 6.745 0 0 1 5.26 17.242Z" />
+                    </svg>
+                    About MCYM
+                </h3>
+                <p class="text-white text-base leading-relaxed font-medium mb-4">
+                    The Malankara Catholic Youth Movement (MCYM) is the official youth wing of the globally spread
+                    Syro-Malankara Catholic Church, focusing on the spiritual development of youth aged 15-35 years in
+                    accordance with Catholic teachings and values. Founded in 1971 under Rev Fr Dominic Skariah with the
+                    benediction of Archbishop Benedict Gregorios, MCYM operates at Unit, Regional, Diocesan and Church
+                    levels across India, North America, Germany, and the Middle East.
                 </p>
+                <p class="text-white text-base leading-relaxed font-medium mb-4">
+                    With its Central Secretariat established in 1990 and a unified constitution promulgated in 1992,
+                    MCYM brings together youth from scattered mission regions worldwide to ensure a strong foundation
+                    for the Church through faith formation, spiritual growth, and active participation in church and
+                    community life.
+                </p>
+                <div class="mt-4">
+                    <a href="https://www.malankaracatholic.de/index.php/apostolates/mcym.html" target="_blank"
+                        class="inline-flex items-center px-4 py-2 bg-yellow-400/30 hover:bg-yellow-500/40 text-yellow-100 rounded-lg text-sm font-semibold transition-colors mr-3 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                            class="w-5 h-5 mr-2">
+                            <path fill-rule="evenodd"
+                                d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-3.5a.75.75 0 00-1.5 0v2.75h-7v-7h2.75a.75.75 0 000-1.5h-3.5z"
+                                clip-rule="evenodd" />
+                            <path fill-rule="evenodd"
+                                d="M6.194 12.753a.75.75 0 001.06.053L16.5 4.44v2.81a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.553l-9.056 8.194a.75.75 0 00-.053 1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Learn More About MCYM Germany
+                    </a>
+                </div>
             </div>
-            <div class="glass rounded-xl p-6 text-white reveal">
-                <h3 class="text-xl font-semibold mb-3">📱 Stay Connected</h3>
-                <p class="text-white/80 leading-relaxed">
-                    Don't miss any events! Subscribe to our calendar or follow us on social media for the latest updates
-                    and announcements.
+            <div class="glass rounded-xl p-6 text-white reveal hover:shadow-lg transition-shadow duration-300">
+                <h3 class="text-xl font-semibold mb-3 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                        class="w-6 h-6 mr-2 text-yellow-300">
+                        <path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
+                        <path fill-rule="evenodd"
+                            d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z"
+                            clip-rule="evenodd" />
+                        <path
+                            d="M12 12.75a.75.75 0 0 0 .75-.75v-.007a.75.75 0 0 0-.75-.75h-.007a.75.75 0 0 0-.75.75v.007a.75.75 0 0 0 .75.75h.007ZM14.25 10.5a.75.75 0 0 0-.75.75v.008a.75.75 0 0 0 .75.75h.008a.75.75 0 0 0 .75-.75v-.008a.75.75 0 0 0-.75-.75h-.008ZM9.75 10.5a.75.75 0 0 0-.75.75v.008a.75.75 0 0 0 .75.75h.008a.75.75 0 0 0 .75-.75v-.008a.75.75 0 0 0-.75-.75H9.75Z" />
+                    </svg>
+                    Stay Connected
+                </h3>
+                <p class="text-white text-base leading-relaxed font-medium">
+                    Never miss an update! Subscribe to our Google Calendar or follow our community channels for the
+                    latest announcements, event details, and fellowship opportunities.
                 </p>
                 <div class="mt-4">
                     <a href="https://calendar.google.com/calendar/embed?src=ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05%40group.calendar.google.com&ctz=Europe%2FBerlin"
                         target="_blank"
-                        class="inline-flex items-center px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm transition-colors">
-                        🔗 Open Calendar
+                        class="inline-flex items-center px-4 py-2 bg-yellow-400/30 hover:bg-yellow-500/40 text-yellow-100 rounded-lg text-sm font-semibold transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                            class="w-5 h-5 mr-2">
+                            <path fill-rule="evenodd"
+                                d="M2 5.75C2 5.336 2.336 5 2.75 5h14.5c.414 0 .75.336.75.75v9.5A1.75 1.75 0 0 1 16.25 17H3.75A1.75 1.75 0 0 1 2 15.25V5.75Zm3.5-1.5c0-.207.081-.406.228-.553.147-.146.346-.227.552-.227h9.44c.206 0 .405.081.552.227.147.147.228.346.228.553V4.5H5.5v-.25Zm-2 3.25a.75.75 0 0 0 0 1.5h13a.75.75 0 0 0 0-1.5h-13Z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Open Full Calendar
                     </a>
                 </div>
             </div>
@@ -739,6 +931,7 @@
             </div>
             <p class="text-white font-medium">MCYM Bonn/Köln</p>
             <p class="text-white/60 text-sm mt-2">Building Faith • Inspiring Youth • Serving Community</p>
+
         </div>
     </footer>
 
@@ -748,24 +941,30 @@
         // ====================================
         const CONFIG = {
             // HYBRID MODE: Add your API credentials to enable live fallback
-            GOOGLE_API_KEY: 'AIzaSyCKG5EWSl4hrKPrZ-LaB3G5BHIITA29oA8',
+            GOOGLE_API_KEY: 'AIzaSyCKG5EWSl4hrKPrZ-LaB3G5BHIITA29oA8', // Add your RESTRICTED browser API key here
             CALENDAR_ID: 'ce68c51efd70dea3bb00658ca61427f860a2902e62894b09434ef0ba6b881b05@group.calendar.google.com',
-            ENABLE_LIVE_FALLBACK: true,
-            MAX_CACHE_AGE_HOURS: 0, // 🔥 ALWAYS use live API for fresh data
-            AUTO_REFRESH_MINUTES: 20,
-            RETRY_ATTEMPTS: 3,
-            UPCOMING_EVENT_LIMIT: 12
+
+            // Hybrid behavior settings
+            ENABLE_LIVE_FALLBACK: true, // Set to true after adding API credentials
+            MAX_CACHE_AGE_HOURS: 0, // Use live API if static data is older than this
+
+            // Performance settings
+            AUTO_REFRESH_MINUTES: 20, // How often to auto-refresh page
+            RETRY_ATTEMPTS: 3, // How many times to retry failed requests
+            UPCOMING_EVENT_LIMIT: 12 // Number of upcoming events to display
         };
 
         // Global variables
         let calendarData = null;
         let isLoading = true;
+        let autoRefreshIntervalId = null; // To manage the interval
 
         // ====================================
         // MAIN DATA FETCHING LOGIC (TRUE HYBRID)
         // ====================================
         async function fetchCalendarEvents() {
             console.log('🔍 Starting hybrid calendar data fetch...');
+            updateStatus('upcoming', 'Fetching calendar data...'); // Initial status
 
             try {
                 // STEP 1: Always try to get static data first
@@ -779,7 +978,7 @@
                 if (dataAge.hours < CONFIG.MAX_CACHE_AGE_HOURS) {
                     // Static data is fresh - use it!
                     console.log('✅ Using fresh static data');
-                    updateStatus('live', `Calendar loaded • ${staticData.totalEvents || staticData.events.length} events • Updated ${dataAge.hours}h ago`);
+                    updateStatus('live', `Calendar loaded • ${staticData.totalEvents || staticData.events.length} events • Updated ${dataAge.hours > 0 ? `${dataAge.hours}h ` : ''}${dataAge.minutes}m ago`);
                     updateLastUpdated(staticData.lastUpdated);
                     return staticData.events;
                 }
@@ -787,21 +986,44 @@
                 // STEP 3: Static data is old - try live API if enabled
                 if (CONFIG.ENABLE_LIVE_FALLBACK && CONFIG.GOOGLE_API_KEY && CONFIG.CALENDAR_ID) {
                     console.log('🔄 Static data is old, fetching live data...');
-                    return await fetchLiveCalendarEvents();
+                    return await fetchLiveCalendarEventsWithRetry();
                 }
 
                 // STEP 4: Live API not available - use old static data with warning
-                console.log('⚠️ Using old static data (live API not enabled)');
-                updateStatus('warning', `Calendar loaded • ${staticData.events.length} events • Data is ${dataAge.hours}h old`);
+                console.warn('⚠️ Using old static data (live API not enabled or failed, and static data is stale)');
+                updateStatus('warning', `Displaying cached data • ${staticData.events.length} events • Data is ${dataAge.hours}h ${dataAge.minutes}m old`);
                 updateLastUpdated(staticData.lastUpdated);
                 return staticData.events;
 
             } catch (error) {
                 console.error('❌ All data sources failed:', error);
-                updateStatus('error', 'Failed to load calendar data');
-                throw error;
+                updateStatus('error', 'Failed to load calendar data. Please try again.');
+                // Attempt to display cached data if available from a previous successful fetch
+                if (calendarData && calendarData.events) {
+                    console.warn('Displaying previously cached data due to full fetch failure.');
+                    return calendarData.events;
+                }
+                throw error; // Re-throw if no cached data to display
             }
         }
+
+        // ====================================
+        // LIVE API SOURCE (HYBRID FALLBACK) WITH RETRY
+        // ====================================
+        async function fetchLiveCalendarEventsWithRetry(attempt = 1) {
+            try {
+                return await fetchLiveCalendarEvents();
+            } catch (error) {
+                console.warn(`Live API fetch attempt ${attempt} failed:`, error.message);
+                if (attempt < CONFIG.RETRY_ATTEMPTS) {
+                    await new Promise(resolve => setTimeout(resolve, attempt * 1000)); // Exponential backoff
+                    return fetchLiveCalendarEventsWithRetry(attempt + 1);
+                }
+                console.error('❌ Live API fetch failed after multiple retries.');
+                throw error; // Re-throw after final attempt
+            }
+        }
+
 
         // ====================================
         // LIVE API SOURCE (HYBRID FALLBACK)
@@ -810,36 +1032,40 @@
             updateStatus('upcoming', '🔄 Loading live calendar data...');
 
             const now = new Date().toISOString();
-            const future = new Date(Date.now() + 3 * 30 * 24 * 60 * 60 * 1000).toISOString(); // 3 months
+            // Fetch events for the next 3 months for a good overview
+            const future = new Date(Date.now() + 3 * 30 * 24 * 60 * 60 * 1000).toISOString();
 
             const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CONFIG.CALENDAR_ID)}/events?key=${CONFIG.GOOGLE_API_KEY}&timeMin=${now}&timeMax=${future}&singleEvents=true&orderBy=startTime&maxResults=50`;
 
             const response = await fetch(url);
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(`Google API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+                console.error('Google API Error Response:', errorData);
+                throw new Error(`Google API error: ${response.status} - ${errorData.error?.message || 'Unknown API error'}`);
             }
 
             const data = await response.json();
             const events = data.items ? data.items.map(event => ({
                 id: event.id,
                 title: event.summary || 'Untitled Event',
-                description: (event.description || '').replace(/<[^>]*>/g, '').substring(0, 300),
+                description: (event.description || '').replace(/<[^>]*>/g, '').substring(0, 300), // Basic HTML strip & truncate
                 start: event.start ? (event.start.dateTime || event.start.date) : null,
                 end: event.end ? (event.end.dateTime || event.end.date) : null,
                 location: event.location || '',
                 htmlLink: event.htmlLink || '',
                 created: event.created,
-                updated: event.updated
-            })).filter(event => event.start) : [];
+                updated: event.updated,
+                recurringEventId: event.recurringEventId // Useful for identifying recurring instances
+            })).filter(event => event.start) : []; // Ensure events have a start time
 
             console.log(`🔴 Live API data loaded: ${events.length} events`);
-            updateStatus('live', `Live calendar loaded • ${events.length} events • Real-time data ⚡`);
+            updateStatus('live', `• ${events.length} events • `);
 
-            calendarData = {
+            calendarData = { // Store the fetched live data
                 lastUpdated: new Date().toISOString(),
                 events: events,
-                source: 'live-api'
+                source: 'live-api',
+                totalEvents: events.length
             };
             updateLastUpdated(calendarData.lastUpdated);
 
@@ -851,22 +1077,31 @@
         // ====================================
         async function fetchStaticCalendarData() {
             const response = await fetch('./data/events.json', {
-                cache: 'no-cache', // Always check for updates
+                cache: 'no-cache', // Always check for updates from the server
                 headers: {
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache'
+                    'Cache-Control': 'no-cache, no-store, must-revalidate', // Stronger cache control
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
                 }
             });
 
             if (!response.ok) {
                 if (response.status === 404) {
-                    throw new Error('Events file not found. Please run the GitHub Action to generate calendar data.');
+                    console.error('Events file (events.json) not found. Ensure the GitHub Action has run successfully and the file is deployed.');
+                    throw new Error('Events data file not found. Please ensure it has been generated.');
                 }
-                throw new Error(`Failed to load calendar data: HTTP ${response.status}`);
+                throw new Error(`Failed to load static calendar data: HTTP ${response.status}`);
             }
 
             const data = await response.json();
+            if (!data.events || !data.lastUpdated) {
+                console.error('Static data is malformed:', data);
+                throw new Error('Static calendar data is incomplete or malformed.');
+            }
             console.log(`📊 Static data loaded: ${data.events.length} events from ${data.source || 'GitHub Actions'}`);
+
+            // Update global calendarData if static is primary and successful
+            calendarData = data;
 
             return data;
         }
@@ -874,11 +1109,13 @@
         // ====================================
         // UTILITY FUNCTIONS
         // ====================================
-        function calculateDataAge(lastUpdated) {
+        function calculateDataAge(lastUpdatedString) {
+            if (!lastUpdatedString) return { hours: Infinity, minutes: Infinity, totalMs: Infinity };
             const now = new Date();
-            const updated = new Date(lastUpdated);
-            const diffMs = now - updated;
+            const updated = new Date(lastUpdatedString);
+            if (isNaN(updated.getTime())) return { hours: Infinity, minutes: Infinity, totalMs: Infinity }; // Invalid date
 
+            const diffMs = now - updated;
             return {
                 hours: Math.floor(diffMs / (1000 * 60 * 60)),
                 minutes: Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60)),
@@ -886,7 +1123,6 @@
             };
         }
 
-        // Update status indicator
         function updateStatus(status, message) {
             const statusIndicator = document.getElementById('calendar-status');
             const statusText = document.getElementById('status-text');
@@ -895,107 +1131,119 @@
             if (statusText) statusText.textContent = message;
         }
 
-        // Update last updated time
         function updateLastUpdated(timestamp) {
             const lastUpdatedEl = document.getElementById('last-updated');
             if (timestamp && lastUpdatedEl) {
-                const date = new Date(timestamp);
-                const timeAgo = getTimeAgo(date);
-                lastUpdatedEl.textContent = `Updated ${timeAgo}`;
+                try {
+                    const date = new Date(timestamp);
+                    if (isNaN(date.getTime())) {
+                        lastUpdatedEl.textContent = 'Last update time unknown';
+                        return;
+                    }
+                    const timeAgo = getTimeAgo(date);
+                    lastUpdatedEl.textContent = `Updated ${timeAgo}`;
+                } catch (e) {
+                    lastUpdatedEl.textContent = 'Error displaying update time';
+                    console.error("Error parsing lastUpdated timestamp:", timestamp, e);
+                }
+            } else if (lastUpdatedEl) {
+                lastUpdatedEl.textContent = '';
             }
         }
 
-        // Get time ago string
         function getTimeAgo(date) {
             const now = new Date();
             const diffTime = Math.abs(now - date);
-            const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const diffSeconds = Math.floor(diffTime / 1000);
+            const diffMinutes = Math.floor(diffSeconds / 60);
+            const diffHours = Math.floor(diffMinutes / 60);
+            const diffDays = Math.floor(diffHours / 24);
 
-            if (diffHours < 1) return 'just now';
-            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffMinutes < 1) return 'just now';
+            if (diffMinutes < 60) return `${diffMinutes}m ago`;
+            if (diffHours < 24) return `${diffHours}h ${diffMinutes % 60}m ago`;
             if (diffDays < 7) return `${diffDays}d ago`;
-            return date.toLocaleDateString();
+            return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         }
+
 
         // ====================================
         // ENHANCED EVENT PROCESSING FUNCTIONS
         // ====================================
-
-        // Get upcoming events from fetched data
         function getUpcomingEvents(events) {
+            if (!Array.isArray(events)) return []; // Guard against undefined or non-array input
             const now = new Date();
-
             return events
                 .filter(event => {
+                    if (!event || !event.start) return false; // Skip invalid events
                     const eventDate = new Date(event.start);
-                    return eventDate >= now;
+                    return !isNaN(eventDate.getTime()) && eventDate >= now; // Check for valid date and future
                 })
                 .sort((a, b) => new Date(a.start) - new Date(b.start))
-                .slice(0, 6); // Show next 6 upcoming events for better display
+                .slice(0, CONFIG.UPCOMING_EVENT_LIMIT); // Use configured limit
         }
 
-        // Enhanced date formatting with full information
         function formatEventDate(dateString) {
             const date = new Date(dateString);
             const today = new Date();
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
 
-            const options = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            };
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
 
             if (date.toDateString() === today.toDateString()) {
-                return "Today, " + date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+                return `Today, ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
             } else if (date.toDateString() === tomorrow.toDateString()) {
-                return "Tomorrow, " + date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+                return `Tomorrow, ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
             } else {
                 return date.toLocaleDateString('en-US', options);
             }
         }
 
-        // Get day number for date block
         function getDateDay(dateString) {
-            const date = new Date(dateString);
-            return date.getDate();
+            return new Date(dateString).getDate();
         }
 
-        // Get month and year for date block
         function getDateMonthYear(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            return new Date(dateString).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
         }
 
-        // Enhanced time formatting
         function formatEventTime(dateString) {
-            if (dateString.length === 10) return "All day";
-
+            // Check if it's an all-day event (date only, no time component)
+            if (dateString && dateString.length === 10 && !dateString.includes('T')) {
+                return "All day";
+            }
             const date = new Date(dateString);
-            return date.toLocaleTimeString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
-            });
+            // Check if time is midnight, often indicating an all-day event stored with time
+            if (date.getHours() === 0 && date.getMinutes() === 0 && date.getSeconds() === 0) {
+                // Further check: if it's a multi-day event, or if end time is also midnight of next day
+                // For simplicity here, we'll assume midnight start can be displayed as "All day" if no specific end time is prominent
+                // This might need adjustment based on how Google Calendar returns all-day events via API vs. specific dateTime
+            }
+            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
         }
 
-        // Enhanced countdown with visual categories
         function getEnhancedTimeUntilEvent(dateString) {
             const now = new Date();
             const eventDate = new Date(dateString);
             const diffTime = eventDate - now;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+
+            if (diffTime < 0) return { text: "Event has passed", cssClass: "countdown-later opacity-70" };
+
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+
 
             let text, cssClass;
 
-            if (diffDays === 0) {
-                if (diffHours <= 1) {
-                    text = "Starting soon!";
-                } else {
+            if (diffDays === 0) { // Today
+                if (diffHours < 1 && diffMinutes > 0) {
+                    text = `In ${diffMinutes} min${diffMinutes > 1 ? 's' : ''}`;
+                } else if (diffHours < 1 && diffMinutes <= 0) {
+                    text = "Starting now!";
+                }
+                else {
                     text = `Today in ${diffHours}h`;
                 }
                 cssClass = "countdown-today";
@@ -1014,48 +1262,80 @@
                 text = `In ${months} month${months > 1 ? 's' : ''}`;
                 cssClass = "countdown-later";
             }
-
             return { text, cssClass };
         }
 
-        // Create Google Calendar add URL
         function createAddToCalendarUrl(event) {
             const startDate = new Date(event.start);
-            const endDate = new Date(event.end);
+            const endDate = event.end ? new Date(event.end) : new Date(startDate.getTime() + (60 * 60 * 1000)); // Default 1 hour duration if no end
 
-            // Format dates for Google Calendar (YYYYMMDDTHHMMSSZ format)
-            const formatGoogleDate = (date) => {
-                return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-            };
+            const formatGoogleDate = (date) => date.toISOString().replace(/[-:.]/g, '').slice(0, -4) + 'Z';
+
+            let datesParam;
+            // Check if it's an all-day event (heuristic: time is midnight or date string has no 'T')
+            if ((event.start.length === 10 && !event.start.includes('T')) || (startDate.getHours() === 0 && startDate.getMinutes() === 0 && startDate.getSeconds() === 0)) {
+                const nextDay = new Date(startDate);
+                nextDay.setDate(startDate.getDate() + 1);
+                datesParam = `${startDate.toISOString().slice(0, 10).replace(/-/g, '')}/${nextDay.toISOString().slice(0, 10).replace(/-/g, '')}`;
+            } else {
+                datesParam = `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`;
+            }
+
 
             const params = new URLSearchParams({
                 action: 'TEMPLATE',
                 text: event.title,
-                dates: `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`,
-                details: event.description || '',
+                dates: datesParam,
+                details: (event.description || '').substring(0, 500) + (event.htmlLink ? `\n\nMore info: ${event.htmlLink}` : ''), // Max details length
                 location: event.location || '',
-                ctz: 'Europe/Berlin'
+                ctz: 'Europe/Berlin' // Important for correct time zone
             });
-
             return `https://calendar.google.com/calendar/render?${params.toString()}`;
         }
 
-        // Enhanced event type detection with more categories
-        function getEventBadge(title, description = '') {
-            const text = (title + ' ' + description).toLowerCase();
+        function getEventBadge(title, description = '', manualBadge = null) {
+            // If a manual badge is specified, use it
+            if (manualBadge && ['mass', 'retreat', 'service', 'prayer', 'youth', 'social', 'meeting', 'special'].includes(manualBadge.toLowerCase())) {
+                return manualBadge.toLowerCase();
+            }
 
-            if (text.includes('mass') || text.includes('holy') || text.includes('liturgy')) return 'mass';
-            if (text.includes('retreat') || text.includes('formation') || text.includes('workshop')) return 'retreat';
-            if (text.includes('service') || text.includes('volunteer') || text.includes('outreach')) return 'service';
-            if (text.includes('prayer') || text.includes('adoration') || text.includes('rosary')) return 'prayer';
-            if (text.includes('youth') || text.includes('fellowship') || text.includes('social')) return 'youth';
+            const text = (String(title) + ' ' + String(description)).toLowerCase();
 
-            return 'default';
+            // Mass/Liturgy events
+            if (text.includes('mass') || text.includes('holy qurbana') || text.includes('qurbana') || text.includes('liturgy') || text.includes('eucharist')) {
+                return 'mass';
+            }
+
+            // Retreat/Formation events  
+            if (text.includes('retreat') || text.includes('formation') || text.includes('workshop') || text.includes('seminar')) {
+                return 'retreat';
+            }
+
+            // Service/Charity events
+            if (text.includes('service') || text.includes('volunteer') || text.includes('charity') || text.includes('outreach') || text.includes('food drive') || text.includes('donation')) {
+                return 'service';
+            }
+
+            // Prayer events
+            if (text.includes('prayer') || text.includes('adoration') || text.includes('rosary') || text.includes('vigil') || text.includes('novena')) {
+                return 'prayer';
+            }
+
+            // Youth/Fellowship events
+            if (text.includes('youth') || text.includes('fellowship') || text.includes('social') || text.includes('gathering') || text.includes('meeting')) {
+                return 'youth';
+            }
+
+            // Bible study gets its own category
+            if (text.includes('bible') || text.includes('scripture') || text.includes('study')) {
+                return 'meeting';
+            }
+
+            return 'special'; // Changed from 'default' to 'special'
         }
 
-        // Create enhanced event card HTML
         function createEventCard(event) {
-            const badgeType = getEventBadge(event.title, event.description);
+            const badgeType = getEventBadge(event.title, event.description, event.badge);
             const eventTime = formatEventTime(event.start);
             const eventDate = formatEventDate(event.start);
             const dateDay = getDateDay(event.start);
@@ -1063,17 +1343,16 @@
             const countdown = getEnhancedTimeUntilEvent(event.start);
             const addToCalendarUrl = createAddToCalendarUrl(event);
 
-            // Truncate description smartly
             const description = event.description ?
-                (event.description.length > 120 ?
-                    event.description.substring(0, 117) + '...' :
+                (event.description.length > 100 ? // Slightly shorter for conciseness
+                    event.description.substring(0, 97) + '...' :
                     event.description) : '';
 
             return `
-                <div class="event-card bg-white shadow-lg">
+                <div class="event-card bg-white shadow-lg flex flex-col">
                     <div class="event-header">
                         <div class="relative z-10">
-                            <span class="event-badge badge-${badgeType}">${badgeType}</span>
+                            <span class="event-badge badge-${badgeType}">${badgeType.replace(/^\w/, c => c.toUpperCase())}</span>
                             <div class="event-date-block">
                                 <div class="event-day">${dateDay}</div>
                                 <div class="event-month-year">${dateMonthYear}</div>
@@ -1084,120 +1363,101 @@
                         </div>
                     </div>
                     
-                    <div class="event-content">
-                        <h3 class="event-title">${event.title}</h3>
+                    <div class="event-content flex flex-col flex-grow">
+                        <h3 class="event-title">${event.title || 'Event Title Missing'}</h3>
                         
                         <div class="event-details">
                             <div class="event-detail-item">
-                                <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
+                                <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 <span><strong>${eventDate}</strong></span>
                             </div>
-                            
                             <div class="event-detail-item">
-                                <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
+                                <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 <span><strong>${eventTime}</strong></span>
                             </div>
-                            
                             ${event.location ? `
                                 <div class="event-detail-item">
-                                    <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
+                                    <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                     <span>${event.location}</span>
-                                </div>
-                            ` : ''}
+                                </div>` : ''}
                         </div>
                         
-                        ${description ? `
-                            <div class="event-description">
-                                <div class="event-detail-item">
-                                    <svg class="event-detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
+                        <div class="event-description ${description ? '' : 'event-description-empty'} flex-grow mb-4">
+                            ${description ? `
+                                <div class="event-detail-item items-start"> <svg class="event-detail-icon mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                     <span>${description}</span>
-                                </div>
-                            </div>
-                        ` : ''}
+                                </div>` : '<p class="text-gray-500 text-sm italic">No additional details provided for this event.</p>'}
+                        </div>
                         
-                        <div class="event-actions">
-                            <a href="${addToCalendarUrl}" 
-                               target="_blank" 
-                               class="event-action-btn btn-primary">
-                                📅 Add to Calendar
+                        <div class="event-actions mt-auto">
+                            <a href="${addToCalendarUrl}" target="_blank" class="event-action-btn btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 inline mr-1.5 -mt-0.5"><path d="M5.75 3.5a.75.75 0 0 0-.75.75v1.5h9.5v-1.5a.75.75 0 0 0-.75-.75h-8Z" /><path fill-rule="evenodd" d="M3 8.75A.75.75 0 0 1 3.75 8h12.5a.75.75 0 0 1 .75.75v5.5A2.75 2.75 0 0 1 14.25 17H5.75A2.75 2.75 0 0 1 3 14.25v-5.5ZM12.75 12a.75.75 0 0 0-.75-.75H8a.75.75 0 0 0-.75.75v.001c0 .414.336.75.75.75h4a.75.75 0 0 0 .75-.75V12Z" clip-rule="evenodd" /></svg>
+                                Add to Calendar
                             </a>
                             ${event.htmlLink ? `
-                                <a href="${event.htmlLink}" 
-                                   target="_blank" 
-                                   class="event-action-btn btn-secondary">
-                                    🔗 View Details
-                                </a>
-                            ` : ''}
+                                <a href="${event.htmlLink}" target="_blank" class="event-action-btn btn-secondary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 inline mr-1.5 -mt-0.5"><path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .976-1.138 2.5 2.5 0 0 1-.142-3.665l3-3Z" /><path d="M8.603 17.03a4 4 0 0 0 5.656-5.656l-1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.06-1.061l-1.225 1.223a4 4 0 0 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865.75.75 0 0 0-.976 1.138 2.5 2.5 0 0 1 .142 3.665l-3 3Z" /></svg>
+                                    View Details
+                                </a>` : ''}
                         </div>
                     </div>
-                </div>
-            `;
+                </div>`;
         }
+
 
         // ====================================
         // MANUAL REFRESH FUNCTIONALITY (HYBRID)
         // ====================================
         async function refreshCalendar() {
             const refreshBtn = document.getElementById('refresh-btn');
-            const originalContent = refreshBtn?.innerHTML;
+            if (!refreshBtn) return;
+
+            const originalContent = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = `<svg class="animate-spin h-4 w-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Refreshing...</span>`;
+            refreshBtn.disabled = true;
+            isLoading = true; // Prevent auto-refresh during manual refresh
 
             try {
-                if (refreshBtn) {
-                    refreshBtn.innerHTML = '<span>⏳</span><span>Refreshing...</span>';
-                    refreshBtn.disabled = true;
-                }
-
                 console.log('🔄 Manual refresh triggered');
-
                 let events;
                 if (CONFIG.ENABLE_LIVE_FALLBACK && CONFIG.GOOGLE_API_KEY && CONFIG.CALENDAR_ID) {
-                    // Force live API call for immediate updates
                     console.log('🔴 Forcing live API call for manual refresh');
-                    events = await fetchLiveCalendarEvents();
+                    events = await fetchLiveCalendarEventsWithRetry(); // Use retry mechanism
                 } else {
-                    // Refresh static data with cache bypass
-                    console.log('📁 Refreshing static data');
-                    events = await fetchCalendarEvents();
+                    console.log('📁 Refreshing static data (cache-bypassed)');
+                    // Re-fetch static data, which inherently bypasses browser cache due to headers
+                    const staticData = await fetchStaticCalendarData();
+                    events = staticData.events;
+                    updateLastUpdated(staticData.lastUpdated); // Update timestamp from static data
                 }
 
                 const upcomingEvents = getUpcomingEvents(events);
                 displayEvents(upcomingEvents);
 
-                // Success feedback
-                if (refreshBtn) {
-                    refreshBtn.innerHTML = '<span>✅</span><span>Updated!</span>';
-                    setTimeout(() => {
-                        refreshBtn.innerHTML = originalContent;
-                        refreshBtn.disabled = false;
-                    }, 2000);
-                }
-
+                refreshBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1.5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Updated!</span>`;
             } catch (error) {
-                console.error('❌ Refresh failed:', error);
-                if (refreshBtn) {
-                    refreshBtn.innerHTML = '<span>❌</span><span>Failed</span>';
-                    setTimeout(() => {
-                        refreshBtn.innerHTML = originalContent;
-                        refreshBtn.disabled = false;
-                    }, 2000);
-                }
+                console.error('❌ Manual refresh failed:', error);
+                updateStatus('error', 'Refresh failed. Please try again.');
+                refreshBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1.5"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22Z" clip-rule="evenodd" /></svg><span>Failed</span>`;
+                // Display error on main status if refresh fails
+                displayEvents([]); // Clear events or show error message via displayEvents
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('loadingEvents').style.display = 'none';
+                document.getElementById('noEventsMessage').style.display = 'none';
+                document.getElementById('upcomingEvents').style.display = 'none';
+            } finally {
+                setTimeout(() => {
+                    refreshBtn.innerHTML = originalContent;
+                    refreshBtn.disabled = false;
+                }, 2500);
+                isLoading = false; // Re-enable auto-refresh possibility
             }
         }
+
 
         // ====================================
         // DISPLAY FUNCTIONS
         // ====================================
-
-        // Helper function to display events with enhanced layout
         function displayEvents(upcomingEvents) {
             const upcomingEventsContainer = document.getElementById('upcomingEvents');
             const loadingContainer = document.getElementById('loadingEvents');
@@ -1205,168 +1465,172 @@
             const errorMessage = document.getElementById('errorMessage');
             const upcomingTitle = document.getElementById('upcomingEventsTitle');
 
-            if (upcomingTitle) {
-                const eventText = upcomingEvents.length === 1 ? 'event' : 'events';
-                upcomingTitle.textContent = `${upcomingEvents.length} upcoming ${eventText} • Updated with hybrid system`;
+            if (loadingContainer) loadingContainer.style.display = 'none';
+            if (errorMessage) errorMessage.style.display = 'none'; // Hide error by default
+
+            if (!Array.isArray(upcomingEvents)) { // Should already be handled by getUpcomingEvents
+                console.error("displayEvents called with non-array:", upcomingEvents);
+                if (errorMessage) errorMessage.style.display = 'block';
+                if (upcomingEventsContainer) upcomingEventsContainer.style.display = 'none';
+                if (noEventsMessage) noEventsMessage.style.display = 'none';
+                if (upcomingTitle) upcomingTitle.innerHTML = `Error loading events.`;
+                return;
             }
 
-            if (loadingContainer) loadingContainer.style.display = 'none';
+            if (upcomingTitle) {
+                if (upcomingEvents.length > 0) {
+                    upcomingTitle.innerHTML = `Discover Our Next <span class="font-semibold gradient-text">${upcomingEvents.length}</span> Activities`;
+                } else {
+                    // Title will be handled by noEventsMessage or errorMessage display
+                }
+            }
+
 
             if (upcomingEvents.length === 0) {
                 if (noEventsMessage) noEventsMessage.style.display = 'block';
                 if (upcomingEventsContainer) upcomingEventsContainer.style.display = 'none';
-                if (errorMessage) errorMessage.style.display = 'none';
             } else {
                 if (upcomingEventsContainer) {
-                    // Create enhanced event cards with proper grid layout
                     upcomingEventsContainer.innerHTML = upcomingEvents
                         .map(event => createEventCard(event))
                         .join('');
 
-                    // Update grid classes based on number of events
-                    const gridClasses = upcomingEvents.length === 1
-                        ? 'grid gap-6 max-w-2xl mx-auto'
-                        : 'grid gap-6 lg:grid-cols-2 xl:grid-cols-2';
+                    let gridClasses = 'grid gap-6 ';
+                    if (upcomingEvents.length === 1) {
+                        gridClasses += 'max-w-xl mx-auto'; // Single item, slightly narrower
+                    } else if (upcomingEvents.length === 2) {
+                        gridClasses += 'md:grid-cols-2 max-w-4xl mx-auto';
+                    } else if (upcomingEvents.length === 3) {
+                        gridClasses += 'md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto'; // 2 on md, 3 on lg
+                    } else { // 4 or more
+                        gridClasses += 'md:grid-cols-2 lg:grid-cols-3';
+                    }
                     upcomingEventsContainer.className = gridClasses;
                     upcomingEventsContainer.style.display = 'grid';
                 }
                 if (noEventsMessage) noEventsMessage.style.display = 'none';
-                if (errorMessage) errorMessage.style.display = 'none';
             }
         }
 
-        // Display upcoming events
         async function displayUpcomingEvents() {
+            isLoading = true; // Set loading flag
             try {
-                updateStatus('upcoming', 'Loading calendar events...');
+                // updateStatus('upcoming', 'Loading calendar events...'); // Already set in fetchCalendarEvents
                 const events = await fetchCalendarEvents();
                 const upcomingEvents = getUpcomingEvents(events);
-
                 displayEvents(upcomingEvents);
-                isLoading = false;
-
             } catch (error) {
-                console.error('Error displaying events:', error);
+                console.error('Error displaying events:', error.message);
+                // Error message display is handled within displayEvents or refreshCalendar
+                // Ensure loading skeletons are hidden and error message is shown
                 const loadingContainer = document.getElementById('loadingEvents');
-                const errorMessage = document.getElementById('errorMessage');
+                const errorMessageContainer = document.getElementById('errorMessage');
                 const upcomingEventsContainer = document.getElementById('upcomingEvents');
-                const noEventsMessage = document.getElementById('noEventsMessage');
+                const noEventsMessageContainer = document.getElementById('noEventsMessage');
 
                 if (loadingContainer) loadingContainer.style.display = 'none';
-                if (errorMessage) errorMessage.style.display = 'block';
+                if (errorMessageContainer) {
+                    errorMessageContainer.style.display = 'block';
+                    // You might want to update the text of errorMessageContainer here if not done by refreshCalendar
+                }
                 if (upcomingEventsContainer) upcomingEventsContainer.style.display = 'none';
-                if (noEventsMessage) noEventsMessage.style.display = 'none';
-                isLoading = false;
+                if (noEventsMessageContainer) noEventsMessageContainer.style.display = 'none';
+                updateStatus('error', error.message || 'Failed to load events.');
+            } finally {
+                isLoading = false; // Clear loading flag
             }
         }
+
 
         // ====================================
         // VISUAL EFFECTS & ANIMATIONS
         // ====================================
-
-        // Create floating particles
         function createParticle() {
             const particle = document.createElement('div');
             particle.className = 'particle';
+            const size = Math.random() * 5 + 3; // Slightly smaller particles
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.animationDuration = `${Math.random() * 15 + 10}s`;
+            particle.style.animationDelay = `${Math.random() * 5}s`;
+            // Vary opacity for depth
+            particle.style.opacity = (Math.random() * 0.5 + 0.3).toFixed(2);
 
-            const size = Math.random() * 6 + 4;
-            particle.style.width = size + 'px';
-            particle.style.height = size + 'px';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
-            particle.style.animationDelay = Math.random() * 5 + 's';
 
             const container = document.getElementById('particles-container');
             if (container) {
                 container.appendChild(particle);
-
-                setTimeout(() => {
-                    if (particle.parentNode) {
-                        particle.parentNode.removeChild(particle);
-                    }
-                }, 25000);
+                // Remove particle after animation finishes to prevent DOM clutter
+                setTimeout(() => particle.remove(), parseFloat(particle.style.animationDuration) * 1000 + parseFloat(particle.style.animationDelay) * 1000 + 1000);
             }
         }
 
-        // Scroll reveal animation
         function initScrollReveal() {
             const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
+                threshold: 0.1, // Reveal when 10% of element is visible
+                rootMargin: '0px 0px -30px 0px' // Start animation a bit earlier
             };
-
-            const observer = new IntersectionObserver((entries) => {
+            const observer = new IntersectionObserver((entries, obs) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('active');
+                        obs.unobserve(entry.target); // Unobserve after revealing
                     }
                 });
             }, observerOptions);
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        }
 
-            document.querySelectorAll('.reveal').forEach(el => {
-                observer.observe(el);
-            });
+        function setFooterYear() {
+            const yearEl = document.getElementById('currentYear');
+            if (yearEl) yearEl.textContent = new Date().getFullYear();
         }
 
         // ====================================
         // INITIALIZATION
         // ====================================
-
-        // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', function () {
-            console.log('🚀 Initializing MCYM hybrid calendar system...');
+            console.log('🚀 Initializing MCYM hybrid calendar system v2...');
             console.log('⚙️ Configuration:', {
                 liveEnabled: CONFIG.ENABLE_LIVE_FALLBACK,
-                maxCacheAge: CONFIG.MAX_CACHE_AGE_HOURS + 'h',
-                autoRefresh: CONFIG.AUTO_REFRESH_MINUTES + 'm'
+                maxCacheAge: `${CONFIG.MAX_CACHE_AGE_HOURS}h`,
+                autoRefresh: `${CONFIG.AUTO_REFRESH_MINUTES}m`,
+                eventLimit: CONFIG.UPCOMING_EVENT_LIMIT
             });
-            console.log('🔄 Data strategy: Static-first with live API fallback');
+            console.log('🔄 Data strategy: Static-first with live API fallback (if configured).');
 
-            // Display upcoming events
             displayUpcomingEvents();
+            setFooterYear();
 
-            // Setup auto-refresh
-            setInterval(() => {
-                if (!isLoading) {
-                    console.log('🔄 Auto-refresh triggered');
+            if (autoRefreshIntervalId) clearInterval(autoRefreshIntervalId); // Clear existing interval if any
+            autoRefreshIntervalId = setInterval(() => {
+                if (!isLoading && document.visibilityState === 'visible') { // Only refresh if page is visible and not loading
+                    console.log('🔄 Auto-refresh triggered by interval.');
                     displayUpcomingEvents();
                 }
             }, CONFIG.AUTO_REFRESH_MINUTES * 60 * 1000);
 
-            // Initialize visual effects
             initScrollReveal();
 
-            // Create initial particles
-            for (let i = 0; i < 5; i++) {
-                setTimeout(createParticle, i * 1000);
+            // Create initial burst of particles, then periodically
+            for (let i = 0; i < 8; i++) { // More initial particles
+                setTimeout(createParticle, i * 500); // Staggered creation
             }
+            setInterval(createParticle, 2500); // Create new particles more frequently
 
-            // Create particles periodically
-            setInterval(createParticle, 3000);
-
-            // Calendar iframe interaction
-            const calendarContainer = document.querySelector('.calendar-iframe-container');
-            if (calendarContainer) {
-                calendarContainer.addEventListener('mouseenter', function () {
-                    this.style.transform = 'scale(1.01)';
+            // Smooth scroll for any internal links (optional, good UX)
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const hrefAttribute = this.getAttribute('href');
+                    if (hrefAttribute && hrefAttribute !== "#") { // Ensure it's not just a placeholder href="#"
+                        const targetElement = document.querySelector(hrefAttribute);
+                        if (targetElement) {
+                            e.preventDefault();
+                            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }
                 });
-                calendarContainer.addEventListener('mouseleave', function () {
-                    this.style.transform = 'scale(1)';
-                });
-            }
-        });
-
-        // Smooth scroll for internal links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
             });
         });
     </script>
