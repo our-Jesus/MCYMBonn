@@ -1,21 +1,21 @@
 {
  "kind": "calendar#events",
- "etag": "\"p32futbfbp768q0o\"",
+ "etag": "\"p33nq9imvhr6oq0o\"",
  "summary": "MCYM Bonn/Köln events",
  "description": "",
- "updated": "2025-05-31T01:40:25.959Z",
+ "updated": "2025-05-31T06:48:43.305Z",
  "timeZone": "Europe/Berlin",
  "accessRole": "reader",
  "defaultReminders": [],
  "items": [
   {
    "kind": "calendar#event",
-   "etag": "\"3497292899480158\"",
+   "etag": "\"3497348217382654\"",
    "id": "2m6a04oba6vn4q697jvavc3122",
    "status": "confirmed",
    "htmlLink": "https://www.google.com/calendar/event?eid=Mm02YTA0b2JhNnZuNHE2OTdqdmF2YzMxMjIgY2U2OGM1MWVmZDcwZGVhM2JiMDA2NThjYTYxNDI3Zjg2MGEyOTAyZTYyODk0YjA5NDM0ZWYwYmE2Yjg4MWIwNUBn",
    "created": "2025-05-30T22:14:35.000Z",
-   "updated": "2025-05-30T23:07:29.740Z",
+   "updated": "2025-05-31T06:48:28.691Z",
    "summary": "Eucharistic Adoration & Holy Qurbono",
    "description": "Eucharistic Adoration and Holy Qurbono according to the Syro-Malankara tradition.",
    "location": "Kiefernweg 22, 53127 Bonn, Germany",
@@ -28,25 +28,25 @@
     "self": true
    },
    "start": {
-    "dateTime": "2025-06-01T03:00:00+02:00",
+    "dateTime": "2025-06-01T15:00:00+02:00",
     "timeZone": "Europe/Berlin"
    },
    "end": {
-    "dateTime": "2025-06-01T05:30:00+02:00",
+    "dateTime": "2025-06-01T17:30:00+02:00",
     "timeZone": "Europe/Berlin"
    },
    "iCalUID": "2m6a04oba6vn4q697jvavc3122@google.com",
-   "sequence": 0,
+   "sequence": 1,
    "eventType": "default"
   },
   {
    "kind": "calendar#event",
-   "etag": "\"3497293107901438\"",
+   "etag": "\"3497348246611166\"",
    "id": "4uei8ejaenbj3r6m6kmqt6dl5m",
    "status": "confirmed",
    "htmlLink": "https://www.google.com/calendar/event?eid=NHVlaThlamFlbmJqM3I2bTZrbXF0NmRsNW0gY2U2OGM1MWVmZDcwZGVhM2JiMDA2NThjYTYxNDI3Zjg2MGEyOTAyZTYyODk0YjA5NDM0ZWYwYmE2Yjg4MWIwNUBn",
    "created": "2025-05-30T23:09:13.000Z",
-   "updated": "2025-05-30T23:09:13.950Z",
+   "updated": "2025-05-31T06:48:43.305Z",
    "summary": "Prayer & Holy Qurbono",
    "description": "Prayer followed by Holy Qurbono according to the Syro-Malankara tradition.",
    "location": "Kiefernweg 22, 53127 Bonn, Germany",
@@ -59,15 +59,15 @@
     "self": true
    },
    "start": {
-    "dateTime": "2025-06-15T03:00:00+02:00",
+    "dateTime": "2025-06-15T15:00:00+02:00",
     "timeZone": "Europe/Berlin"
    },
    "end": {
-    "dateTime": "2025-06-15T05:30:00+02:00",
+    "dateTime": "2025-06-15T17:30:00+02:00",
     "timeZone": "Europe/Berlin"
    },
    "iCalUID": "4uei8ejaenbj3r6m6kmqt6dl5m@google.com",
-   "sequence": 0,
+   "sequence": 1,
    "eventType": "default"
   }
  ]
