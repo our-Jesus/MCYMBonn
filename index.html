@@ -879,6 +879,7 @@ SAMPLE events.json STRUCTURE:
         let calendarData = null;
         let isLoading = true;
         let autoRefreshIntervalId = null;
+        let realTimeUpdateIntervalId = null; // For real-time countdown updates
 
         // 🛡️ Anti-abuse protection variables
         let lastRefreshTime = 0;
@@ -1104,7 +1105,7 @@ SAMPLE events.json STRUCTURE:
         }
 
         // ====================================
-        // 🤖 BOT DETECTION FUNCTION
+        // 🤖 BOT DETECTION FUNCTION (LESS AGGRESSIVE)
         // ====================================
         function detectBot() {
             if (!CONFIG.ENABLE_BOT_DETECTION) {
@@ -1112,17 +1113,20 @@ SAMPLE events.json STRUCTURE:
             }
 
             const userAgent = navigator.userAgent.toLowerCase();
+
+            // More specific bot patterns - less likely to catch regular browsers
             const botPatterns = [
-                'bot', 'crawl', 'spider', 'scrape', 'wget', 'curl',
-                'http', 'python', 'java', 'go-http', 'node', 'phantom'
+                'googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider',
+                'yandexbot', 'facebookexternalhit', 'twitterbot', 'linkedinbot',
+                'whatsapp', 'wget', 'curl', 'python-requests', 'scrapy'
             ];
 
             const isBot = botPatterns.some(pattern => userAgent.includes(pattern));
-            const hasWebdriver = 'webdriver' in navigator || navigator.webdriver;
+            const hasWebdriver = navigator.webdriver === true; // More specific check
             const isHeadless = /headless/i.test(userAgent);
 
             if (isBot || hasWebdriver || isHeadless) {
-                console.warn('🤖 Potential bot detected, disabling manual refresh');
+                console.warn('🤖 Bot detected:', { userAgent, hasWebdriver, isHeadless });
                 const refreshBtn = document.getElementById('refresh-btn');
                 if (refreshBtn) {
                     refreshBtn.style.display = 'none';
@@ -1130,6 +1134,8 @@ SAMPLE events.json STRUCTURE:
                 return true;
             }
 
+            // Debug: Show that bot detection passed
+            console.log('✅ Bot detection passed - refresh button should be visible');
             return false;
         }
 
@@ -1483,6 +1489,57 @@ SAMPLE events.json STRUCTURE:
         }
 
         // ====================================
+        // ⏰ REAL-TIME UPDATE FUNCTIONS
+        // ====================================
+        function updateCountdownsInRealTime() {
+            // Update all countdown badges
+            const countdownBadges = document.querySelectorAll('.countdown-badge');
+            countdownBadges.forEach((badge, index) => {
+                const eventCard = badge.closest('.event-card');
+                if (eventCard) {
+                    // Try to find the event data from the displayed events
+                    const eventTitle = eventCard.querySelector('.event-title')?.textContent;
+                    if (calendarData && calendarData.events) {
+                        const event = calendarData.events.find(e => e.title === eventTitle);
+                        if (event && event.start) {
+                            const newCountdown = getEnhancedTimeUntilEvent(event.start);
+                            badge.textContent = newCountdown.text;
+                            badge.className = `countdown-badge ${newCountdown.cssClass}`;
+                        }
+                    }
+                }
+            });
+
+            // Update "updated X ago" text
+            if (calendarData && calendarData.lastUpdated) {
+                updateLastUpdated(calendarData.lastUpdated);
+            }
+        }
+
+        function startRealTimeUpdates() {
+            // Update every minute
+            if (realTimeUpdateIntervalId) {
+                clearInterval(realTimeUpdateIntervalId);
+            }
+
+            realTimeUpdateIntervalId = setInterval(() => {
+                if (!isLoading && document.visibilityState === 'visible') {
+                    updateCountdownsInRealTime();
+                    console.log('⏰ Real-time countdown update applied');
+                }
+            }, 60000); // Update every minute
+
+            console.log('⏰ Real-time updates started - countdowns will update every minute');
+        }
+
+        function stopRealTimeUpdates() {
+            if (realTimeUpdateIntervalId) {
+                clearInterval(realTimeUpdateIntervalId);
+                realTimeUpdateIntervalId = null;
+                console.log('⏰ Real-time updates stopped');
+            }
+        }
+        // ====================================
         // DISPLAY FUNCTIONS
         // ====================================
         function displayEvents(upcomingEvents) {
@@ -1501,6 +1558,7 @@ SAMPLE events.json STRUCTURE:
                 if (upcomingEventsContainer) upcomingEventsContainer.style.display = 'none';
                 if (noEventsMessage) noEventsMessage.style.display = 'none';
                 if (upcomingTitle) upcomingTitle.innerHTML = `Error loading events.`;
+                stopRealTimeUpdates(); // Stop updates if there's an error
                 return;
             }
 
@@ -1513,6 +1571,7 @@ SAMPLE events.json STRUCTURE:
             if (upcomingEvents.length === 0) {
                 if (noEventsMessage) noEventsMessage.style.display = 'block';
                 if (upcomingEventsContainer) upcomingEventsContainer.style.display = 'none';
+                stopRealTimeUpdates(); // Stop updates if no events
             } else {
                 if (upcomingEventsContainer) {
                     upcomingEventsContainer.innerHTML = upcomingEvents
@@ -1533,6 +1592,9 @@ SAMPLE events.json STRUCTURE:
                     upcomingEventsContainer.style.display = 'grid';
                 }
                 if (noEventsMessage) noEventsMessage.style.display = 'none';
+
+                // ⏰ Start real-time updates when events are displayed
+                startRealTimeUpdates();
             }
         }
 
@@ -1619,10 +1681,33 @@ SAMPLE events.json STRUCTURE:
             console.log('🛡️ Anti-abuse protection: ENABLED');
             console.log('🤖 Bot detection: ENABLED');
 
-            // 🤖 Bot detection
+            // 🤖 Bot detection with debugging
             const isBot = detectBot();
             if (isBot) {
                 console.log('🤖 Bot detected - showing static data only');
+            } else {
+                console.log('✅ Not a bot - refresh button should be visible');
+
+                // Double-check refresh button visibility
+                setTimeout(() => {
+                    const refreshBtn = document.getElementById('refresh-btn');
+                    if (refreshBtn) {
+                        const isVisible = refreshBtn.style.display !== 'none' &&
+                            getComputedStyle(refreshBtn).display !== 'none';
+                        console.log('🔍 Refresh button status:', {
+                            exists: true,
+                            visible: isVisible,
+                            style: refreshBtn.style.display,
+                            computed: getComputedStyle(refreshBtn).display
+                        });
+
+                        if (!isVisible) {
+                            console.warn('⚠️ Refresh button is hidden! This might be due to bot detection or CSS issues.');
+                        }
+                    } else {
+                        console.error('❌ Refresh button not found in DOM!');
+                    }
+                }, 1000);
             }
 
             displayUpcomingEvents();
@@ -1638,6 +1723,26 @@ SAMPLE events.json STRUCTURE:
                     }
                 }, CONFIG.AUTO_REFRESH_MINUTES * 60 * 1000);
             }
+
+            // 🔧 Emergency refresh button recovery (for debugging)
+            // Type "showRefreshButton()" in console if button gets hidden incorrectly
+            window.showRefreshButton = function () {
+                const refreshBtn = document.getElementById('refresh-btn');
+                if (refreshBtn) {
+                    refreshBtn.style.display = '';
+                    refreshBtn.style.visibility = 'visible';
+                    refreshBtn.style.opacity = '1';
+                    console.log('✅ Refresh button restored! You can now use it.');
+                } else {
+                    console.error('❌ Refresh button not found');
+                }
+            };
+
+            // Clean up intervals when page unloads
+            window.addEventListener('beforeunload', () => {
+                stopRealTimeUpdates();
+                if (autoRefreshIntervalId) clearInterval(autoRefreshIntervalId);
+            });
 
             initScrollReveal();
 
