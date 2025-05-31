@@ -960,40 +960,57 @@ Google Calendar API if configured.
         let autoRefreshIntervalId = null; // To manage the interval
 
         // ====================================
-        // MAIN DATA FETCHING LOGIC (TRUE HYBRID)
+        // MAIN DATA FETCHING LOGIC (TRUE HYBRID) - FIXED
         // ====================================
         async function fetchCalendarEvents() {
             console.log('🔍 Starting hybrid calendar data fetch...');
             updateStatus('upcoming', 'Fetching calendar data...'); // Initial status
 
+            let staticData = null;
+            let staticDataError = null;
+
             try {
-                // STEP 1: Always try to get static data first
+                // STEP 1: Try to get static data first (but don't fail if it doesn't exist)
                 console.log('📁 Attempting to fetch static data from GitHub Actions...');
-                const staticData = await fetchStaticCalendarData();
+                try {
+                    staticData = await fetchStaticCalendarData();
+                    console.log('✅ Static data fetched successfully');
+                } catch (error) {
+                    staticDataError = error;
+                    console.warn('⚠️ Static data fetch failed:', error.message);
+                }
 
-                // STEP 2: Check if static data is fresh enough
-                const dataAge = calculateDataAge(staticData.lastUpdated);
-                console.log(`⏰ Static data age: ${dataAge.hours} hours, ${dataAge.minutes} minutes`);
+                // STEP 2: If we have static data, check if it's fresh enough
+                if (staticData) {
+                    const dataAge = calculateDataAge(staticData.lastUpdated);
+                    console.log(`⏰ Static data age: ${dataAge.hours} hours, ${dataAge.minutes} minutes`);
 
-                if (dataAge.hours < CONFIG.MAX_CACHE_AGE_HOURS) {
-                    // Static data is fresh - use it!
-                    console.log('✅ Using fresh static data');
-                    updateStatus('live', `Calendar loaded • ${staticData.totalEvents || staticData.events.length} events • Updated ${dataAge.hours > 0 ? `${dataAge.hours}h ` : ''}${dataAge.minutes}m ago`);
+                    if (dataAge.hours < CONFIG.MAX_CACHE_AGE_HOURS) {
+                        // Static data is fresh - use it!
+                        console.log('✅ Using fresh static data');
+                        updateStatus('live', `Calendar loaded • ${staticData.totalEvents || staticData.events.length} events • Updated ${dataAge.hours > 0 ? `${dataAge.hours}h ` : ''}${dataAge.minutes}m ago`);
+                        updateLastUpdated(staticData.lastUpdated);
+                        return staticData.events;
+                    }
+                }
+
+                // STEP 3: Static data is old/missing - try live API if enabled
+                if (CONFIG.ENABLE_LIVE_FALLBACK && CONFIG.GOOGLE_API_KEY && CONFIG.CALENDAR_ID) {
+                    console.log('🔄 Static data is old/missing, fetching live data...');
+                    return await fetchLiveCalendarEventsWithRetry();
+                }
+
+                // STEP 4: Live API not available - use old static data with warning (if we have any)
+                if (staticData) {
+                    const dataAge = calculateDataAge(staticData.lastUpdated);
+                    console.warn('⚠️ Using old static data (live API not enabled or failed, and static data is stale)');
+                    updateStatus('warning', `Displaying cached data • ${staticData.events.length} events • Data is ${dataAge.hours}h ${dataAge.minutes}m old`);
                     updateLastUpdated(staticData.lastUpdated);
                     return staticData.events;
                 }
 
-                // STEP 3: Static data is old - try live API if enabled
-                if (CONFIG.ENABLE_LIVE_FALLBACK && CONFIG.GOOGLE_API_KEY && CONFIG.CALENDAR_ID) {
-                    console.log('🔄 Static data is old, fetching live data...');
-                    return await fetchLiveCalendarEventsWithRetry();
-                }
-
-                // STEP 4: Live API not available - use old static data with warning
-                console.warn('⚠️ Using old static data (live API not enabled or failed, and static data is stale)');
-                updateStatus('warning', `Displaying cached data • ${staticData.events.length} events • Data is ${dataAge.hours}h ${dataAge.minutes}m old`);
-                updateLastUpdated(staticData.lastUpdated);
-                return staticData.events;
+                // STEP 5: No data sources available
+                throw new Error('No calendar data available. Static file not found and live API not configured.');
 
             } catch (error) {
                 console.error('❌ All data sources failed:', error);
@@ -1073,7 +1090,7 @@ Google Calendar API if configured.
         }
 
         // ====================================
-        // STATIC DATA SOURCE (PRIMARY)
+        // STATIC DATA SOURCE (PRIMARY) - IMPROVED ERROR HANDLING
         // ====================================
         async function fetchStaticCalendarData() {
             const response = await fetch('./data/events.json', {
@@ -1087,8 +1104,8 @@ Google Calendar API if configured.
 
             if (!response.ok) {
                 if (response.status === 404) {
-                    console.error('Events file (events.json) not found. Ensure the GitHub Action has run successfully and the file is deployed.');
-                    throw new Error('Events data file not found. Please ensure it has been generated.');
+                    console.warn('📁 Events file (events.json) not found - this is normal if using live API only');
+                    throw new Error('STATIC_FILE_NOT_FOUND'); // Special error code for missing file
                 }
                 throw new Error(`Failed to load static calendar data: HTTP ${response.status}`);
             }
